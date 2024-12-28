@@ -55,12 +55,19 @@ class _QuizScreenState extends State<QuizScreen> {
       final currentQuestion = _questions[_currentQuestionIndex];
       if (currentQuestion['type'] == 'single') {
         _answers[_currentQuestionIndex] = [option];
-        // Auto-progress for single choice questions
-        if (_currentQuestionIndex < _questions.length - 1) {
-          _currentQuestionIndex++;
-        } else {
-          _showResults();
-        }
+        debugPrint('Selected option(s) for question ${_currentQuestionIndex + 1}: [$option]');
+        
+        // Auto-progress for single choice questions after a short delay
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (_currentQuestionIndex < _questions.length - 1) {
+            setState(() {
+              _currentQuestionIndex++;
+              debugPrint('Moving to question: ${_currentQuestionIndex + 1}');
+            });
+          } else {
+            _showResults();
+          }
+        });
       } else {
         // Multiple choice handling
         _answers[_currentQuestionIndex] = _answers[_currentQuestionIndex] ?? [];
@@ -70,8 +77,8 @@ class _QuizScreenState extends State<QuizScreen> {
         } else {
           currentAnswers.add(option);
         }
+        debugPrint('Selected option(s) for question ${_currentQuestionIndex + 1}: $currentAnswers');
       }
-      debugPrint('Selected option(s) for question $_currentQuestionIndex: ${_answers[_currentQuestionIndex]}');
     });
   }
 
@@ -79,7 +86,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (_currentQuestionIndex < _questions.length - 1) {
       setState(() {
         _currentQuestionIndex++;
-        debugPrint('Moving to question: $_currentQuestionIndex');
+        debugPrint('Moving to question: ${_currentQuestionIndex + 1}');
       });
     } else {
       _showResults();
@@ -88,7 +95,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showResults() {
     debugPrint('Quiz complete!');
-    // TODO: Navigate to results screen with calculated scores
+    // TODO: Navigate to results screen
   }
 
   @override
@@ -99,11 +106,14 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.purple, Colors.pink],
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.8),
+              Theme.of(context).primaryColorDark,
+            ],
           ),
         ),
         child: SafeArea(
@@ -111,18 +121,31 @@ class _QuizScreenState extends State<QuizScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                LinearProgressIndicator(
-                  value: (_currentQuestionIndex + 1) / _questions.length,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.purple),
+                // Progress bar with container for visibility
+                Container(
+                  height: 8.0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4.0),
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4.0),
+                    child: LinearProgressIndicator(
+                      value: (_currentQuestionIndex + 1) / _questions.length,
+                      backgroundColor: Colors.transparent,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.7)),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 
                 Text(
                   currentQuestion['text'],
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: const TextStyle(
                     color: Colors.white,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Quicksand',
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -131,9 +154,10 @@ class _QuizScreenState extends State<QuizScreen> {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       'Select all that apply',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
                         fontStyle: FontStyle.italic,
+                        fontFamily: 'Quicksand',
                       ),
                     ),
                   ),
@@ -153,14 +177,20 @@ class _QuizScreenState extends State<QuizScreen> {
                         child: ElevatedButton(
                           onPressed: () => _handleOptionSelected(option),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isSelected ? Colors.purple : Colors.white,
-                            foregroundColor: isSelected ? Colors.white : Colors.black87,
+                            backgroundColor: isSelected ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.2),
+                            foregroundColor: isSelected ? Colors.purple : Colors.white,
                             padding: const EdgeInsets.all(20),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Text(option),
+                          child: Text(
+                            option,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'Quicksand',
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -171,17 +201,25 @@ class _QuizScreenState extends State<QuizScreen> {
                   ElevatedButton(
                     onPressed: currentAnswers.isNotEmpty ? _handleNext : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white.withOpacity(0.9),
+                      foregroundColor: Colors.purple,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     child: Text(
                       _currentQuestionIndex == _questions.length - 1 
                         ? 'See Results' 
                         : 'Next',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Quicksand',
+                      ),
                     ),
                   ),
               ],

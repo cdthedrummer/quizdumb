@@ -5,6 +5,15 @@ import 'quiz_screen.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
+  static const Map<String, String> attributeIcons = {
+    'Strength': '💪',
+    'Dexterity': '🎯',
+    'Constitution': '🛡️',
+    'Intelligence': '🧠',
+    'Wisdom': '🔮',
+    'Charisma': '⭐',
+  };
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -62,9 +71,6 @@ class WelcomeScreen extends StatelessWidget {
                       runSpacing: 20,
                       alignment: WrapAlignment.center,
                       children: attributeIcons.entries.map((entry) {
-                        String label = entry.key.toString().split('.').last;
-                        label = label[0].toUpperCase() + label.substring(1).toLowerCase();
-                        
                         return SizedBox(
                           width: isPortrait ? size.width * 0.28 : size.width * 0.15,
                           child: Column(
@@ -74,7 +80,7 @@ class WelcomeScreen extends StatelessWidget {
                                 style: const TextStyle(fontSize: 24),
                               ),
                               Text(
-                                label,
+                                entry.key,
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,

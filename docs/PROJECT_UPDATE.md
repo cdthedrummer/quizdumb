@@ -1,129 +1,136 @@
-# QuizDumb Project Update
+# QuizDumb Project Update - December 2024
 
 ## 🎯 Current Status
 
 ### ✅ Completed Features
-- Basic app structure and navigation
-- Welcome screen with attribute icons
-- Quiz screen with single/multiple choice handling
-- Auto-progress for single choice questions
-- Progress bar implementation
-- Results screen with score visualization
-- Basic state management
-- Gradient backgrounds
-- Custom fonts integration (Quicksand)
+- Modular project structure with clean architecture
+- Welcome screen with animated gradient and attribute icons
+- Quiz flow with both single and multiple choice questions
+- Results screen with character class determination
+- D&D-style attribute system and scoring
+- Character class personality system
+- Haptic feedback integration
+- Smooth transitions and animations
+- Debug logging throughout app
 
-### 🏗️ In Progress
-- [ ] Adding more questions from question bank
-- [ ] Enhancing visual feedback for selections
-- [ ] Implementing animations
-- [ ] Adding attribute descriptions
-- [ ] Score calculation improvements
-
-### 📋 Project Structure
+### 🏗️ Project Structure
 ```
 lib/
-  ├── main.dart           # App entry point
-  ├── models/            
-  │   ├── question.dart   # Question model
-  │   └── result.dart     # Results calculation
-  ├── screens/           
-  │   ├── welcome_screen.dart
-  │   ├── quiz_screen.dart
-  │   └── results_screen.dart
-  └── widgets/            # Future reusable components
+  ├── data/               # Data layer
+  │   └── questions.dart  # Question data
+  ├── models/             # Domain models
+  │   ├── character_class.dart
+  │   ├── question.dart
+  │   ├── quiz_state.dart
+  │   └── result.dart
+  ├── providers/          # State management
+  │   └── quiz_provider.dart
+  ├── screens/            # UI layer
+  │   ├── quiz/
+  │   │   ├── components/
+  │   │   └── quiz_screen.dart
+  │   ├── results/
+  │   │   ├── components/
+  │   │   └── results_screen.dart
+  │   └── welcome_screen.dart
+  ├── services/           # Business logic
+  │   └── class_calculator.dart
+  ├── widgets/            # Shared widgets
+  │   └── animated_gradient_container.dart
+  └── main.dart
 ```
 
-## 🚀 Next Steps
+## 🎯 Next Steps
 
-### Priority 1: Content & Logic
-- [ ] Add remaining questions from question bank
-- [ ] Implement question randomization
-- [ ] Add question categories/types
-- [ ] Enhance scoring algorithm
-- [ ] Add result descriptions and recommendations
+### Priority 1: Core Experience
+- [ ] Add detailed character class descriptions and traits
+- [ ] Enhance character class determination logic
+- [ ] Implement score normalization
+- [ ] Add more personality insights
+- [ ] Create engaging results sharing format
 
-### Priority 2: UI/UX Improvements
-- [ ] Add animations for:
-  - [ ] Question transitions
-  - [ ] Option selection
-  - [ ] Progress bar updates
-  - [ ] Results reveal
-- [ ] Enhance visual feedback
-- [ ] Add sound effects
-- [ ] Implement haptic feedback
+### Priority 2: UI/UX Polish
+- [ ] Add micro-animations throughout
+- [ ] Enhance visual feedback for user actions
+- [ ] Implement sound design
+- [ ] Create loading states and transitions
+- [ ] Add error handling and recovery UIs
 
-### Priority 3: Features
-- [ ] Add save/resume functionality
-- [ ] Implement share results
-- [ ] Add achievements system
-- [ ] Create onboarding experience
+### Priority 3: New Features
+- [ ] Create detailed view for results
+- [ ] Add progress saving
+- [ ] Implement achievements system
+- [ ] Create social sharing
+- [ ] Add anonymous analytics
+
+## 🎮 Character Class System
+- Currently implemented classes:
+  - Wizard (Intelligence/Wisdom)
+  - Rogue (Dexterity/Charisma)
+  - Druid (Wisdom/Constitution)
+  - Warrior (Strength/Constitution)
+  - Bard (Charisma/Dexterity)
+  - Paladin (Constitution/Charisma)
+  - Jack of All Trades (Balanced)
 
 ## 🛠️ Development Guidelines
 
-### Important Notes for Contributors
-1. **ALWAYS Push Directly to GitHub**
-   - Use create_or_update_file for all changes
-   - Ignore GitHub API errors in responses
-   - Never create local-only implementations
+### Code Organization
+1. **Component-First Development**
+   - Break screens into small, focused components
+   - Keep files under 300 lines
+   - Use proper widget hierarchy
 
-2. **Flutter-First Approach**
-   - No React/Web approaches
-   - Use Flutter's built-in widgets when possible
-   - Follow Material Design 3 guidelines
+2. **State Management**
+   - Local state for UI-only states
+   - Quiz state for question/answer flow
+   - Results state for character determination
 
-3. **Code Organization**
-   - Keep files small and focused
-   - Use proper Flutter structure
-   - Add debug logs for development
+3. **Testing & Debugging**
+   - Add debug prints for state changes
+   - Log user interactions
+   - Document edge cases
 
-4. **State Management**
-   - Use simple state management for now
-   - Prepare for potential Provider/Riverpod implementation
+### Best Practices
+1. Follow Material Design 3 guidelines
+2. Implement proper error handling
+3. Use const constructors where possible
+4. Keep business logic in services
+5. Document complex algorithms
 
-### File Locations for New Features
-- New questions: `lib/data/questions.dart`
-- UI components: `lib/widgets/`
-- Screen layouts: `lib/screens/`
-- Models: `lib/models/`
-- Utils: `lib/utils/`
+### Dependency Management
+- Minimize external dependencies
+- Use Flutter built-in widgets when possible
+- Document required dependencies
 
-### Essential Dependencies
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  google_fonts: ^6.1.0
-  shared_preferences: ^2.2.2
-```
+### File Organization
+- Components go in screen-specific component folders
+- Shared widgets go in widgets folder
+- Business logic goes in services folder
 
-## 🎮 Question Guidelines
-- Keep questions engaging but concise
-- Follow D&D attribute style
-- Maintain balance between attributes
-- Include both single and multiple choice
-- Add personality assessment elements
+## 📝 Documentation Guidelines
+1. Add comments for complex logic
+2. Update PROJECT_UPDATE.md for major changes
+3. Keep README.md current
+4. Document setup requirements
 
-## 🤝 Getting Started with Development
-1. Read all documentation in `/docs`
-2. Check current implementation in `lib/`
-3. Use GitHub API for all file changes
-4. Follow the Flutter-first approach
-5. Add debug logs for development
-6. Verify repository changes after updates
+## 🐛 Common Issues & Solutions
+1. **Import Errors**
+   - Check file structure
+   - Verify import paths
+   - Use proper package imports
 
-## ⚠️ Common Pitfalls to Avoid
-1. Creating local implementations
-2. Using React/Web approaches
-3. Skipping debug logs
-4. Missing repository verification
-5. Implementing complex state management
-6. Adding unnecessary dependencies
+2. **State Management**
+   - Use setState for local UI
+   - Implement ChangeNotifier for complex state
+   - Keep state close to usage
 
-### Example Implementation Path
-1. Review `/docs/PROJECT_UPDATE.md`
-2. Check existing files before changes
-3. Use create_or_update_file for changes
-4. Add debug logs
-5. Verify changes in repository
-6. Update documentation
+3. **Build Errors**
+   - Run flutter clean
+   - Check pubspec.yaml
+   - Verify Flutter version
+
+4. **UI Issues**
+   - Use LayoutBuilder for responsiveness
+   - Handle edge cases
+   - Test on different screen sizes

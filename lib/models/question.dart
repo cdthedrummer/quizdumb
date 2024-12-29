@@ -2,7 +2,7 @@ class Question {
   final int id;
   final String text;
   final List<String>? options;
-  final String type; // 'single', 'multiple', or 'scale'
+  final String type;
   final Map<String, Map<String, int>>? attributes;
   final Map<String, int>? scaleAttributes;
 
@@ -15,9 +15,13 @@ class Question {
     this.scaleAttributes,
   });
 
+  // Helper getters for type checking
   bool get isMultipleChoice => type == 'multiple';
   bool get isSingleChoice => type == 'single';
   bool get isScale => type == 'scale';
+
+  // Backward compatibility getter
+  Map<String, Map<String, int>> get attributeScores => attributes ?? {};
 
   Map<String, int> calculateScore(dynamic answer) {
     if (isScale && answer is int) {

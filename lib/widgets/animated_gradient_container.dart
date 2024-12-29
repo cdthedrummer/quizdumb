@@ -11,19 +11,17 @@ class AnimatedGradientContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Theme.of(context).primaryColor.withAlpha(204),
-            Theme.of(context).primaryColorDark,
+            Color(0xFF8B7BC4),  // Lighter purple blue at top
+            Color(0xFF4267B2),  // Darker blue at bottom
           ],
         ),
       ),
-      child: SafeArea(
-        child: child,
-      ),
+      child: child,
     );
   }
 }

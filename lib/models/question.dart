@@ -5,6 +5,7 @@ class Question {
   final String type;
   final Map<String, Map<String, int>>? attributes;
   final Map<String, int>? scaleAttributes;
+  final Map<int, String>? scaleLabels;  // Added this field
 
   const Question({
     required this.id,
@@ -13,40 +14,22 @@ class Question {
     this.options,
     this.attributes,
     this.scaleAttributes,
-  });
+    this.scaleLabels,
+  }) : assert(
+          (type == 'scale' && scaleAttributes != null) ||
+          ((type == 'single' || type == 'multiple') &&
+              options != null &&
+              attributes != null),
+        );
 
-  // Helper getters for type checking
   bool get isMultipleChoice => type == 'multiple';
   bool get isSingleChoice => type == 'single';
   bool get isScale => type == 'scale';
 
-  // Backward compatibility getter
-  Map<String, Map<String, int>> get attributeScores => attributes ?? {};
-
-  Map<String, int> calculateScore(dynamic answer) {
-    if (isScale && answer is int) {
-      return _calculateScaleScore(answer);
-    } else if (answer is List<String>) {
-      return _calculateChoiceScore(answer);
+  String getScaleLabel(int value) {
+    if (isScale && scaleLabels != null && scaleLabels!.containsKey(value)) {
+      return scaleLabels![value]!;
     }
-    return {};
-  }
-
-  Map<String, int> _calculateScaleScore(int value) {
-    Map<String, int> scores = {};
-    scaleAttributes?.forEach((attribute, baseValue) {
-      scores[attribute] = baseValue * value;
-    });
-    return scores;
-  }
-
-  Map<String, int> _calculateChoiceScore(List<String> selectedOptions) {
-    Map<String, int> scores = {};
-    for (final option in selectedOptions) {
-      attributes?[option]?.forEach((attribute, value) {
-        scores[attribute] = (scores[attribute] ?? 0) + value;
-      });
-    }
-    return scores;
+    return value.toString();
   }
 }

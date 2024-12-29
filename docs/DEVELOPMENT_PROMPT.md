@@ -1,130 +1,74 @@
 # QuizDumb Development Prompt
 
-## Overview
-QuizDumb is a Flutter app that helps users discover their character class through a D&D-inspired personality quiz. The app features engaging animations, haptic feedback, and detailed personality insights.
+Repository: https://github.com/cdthedrummer/quizdumb
 
-## Current Focus
-We are building the next iteration of features focusing on:
-1. Enhanced character class determination
-2. Detailed personality insights
-3. Polished animations and transitions
-4. Social sharing capabilities
+## Guidelines for Development
 
-## Development Requirements
+### Response Length Management
+- Keep individual file updates under 200 lines when possible
+- Break larger changes into multiple commits
+- Focus on one component or feature at a time
+- Use separate messages for different types of changes
 
-### Key Points
-1. This is a Flutter/Dart project, NOT React/Web
-2. Push changes directly to GitHub using create_or_update_file
-3. Ignore GitHub API errors in responses
-4. Follow the lib/ directory structure
-5. Keep files small and modular
-6. Include debug logs
-7. Always verify repository changes
+### Component Development
+1. Review existing components first
+2. Reuse patterns and styles
+3. Keep new components focused and minimal
+4. Test in isolation before integration
 
 ### Repository Structure
 ```
 lib/
-  ├── data/       # Data layer
-  ├── models/     # Domain models
-  ├── providers/  # State management
-  ├── screens/    # UI components
-  ├── services/   # Business logic
-  └── widgets/    # Shared widgets
+  ├── data/           # Question and content data
+  ├── models/         # Core data models
+  ├── screens/        # Main screen widgets
+  │   ├── quiz/       # Quiz flow screens
+  │   └── results/    # Results screens
+  ├── widgets/        # Shared widgets
+  └── main.dart       # App entry point
 ```
 
-### Common Tasks
-1. **Adding New Features**
-   - Check existing implementations
-   - Create modular components
-   - Add proper debug logging
-   - Update documentation
+### Recent Changes
+1. Question Model:
+   - Added scale labels
+   - Support for rich answers
+   - Flexible question types
 
-2. **UI Updates**
-   - Follow Material Design 3
-   - Use consistent styling
-   - Implement proper animations
-   - Add haptic feedback
+2. State Management:
+   - Improved type safety
+   - Better null handling
+   - Cleaner state updates
 
-3. **State Management**
-   - Keep state close to usage
-   - Use appropriate scoping
-   - Document state flow
-   - Handle edge cases
+3. UI Components:
+   - Consistent styling
+   - Better animations
+   - Modular structure
 
-## Implementation Guidelines
+### Focus Areas
+1. Question Updates:
+   - Implement 16 Personalities style scales
+   - Add rich answer formats
+   - Update question content
 
-### Creating New Components
-1. Create component file in appropriate directory
-2. Add debug logging
-3. Implement error handling
-4. Add documentation
-5. Update relevant test files
+2. Results Enhancement:
+   - Add image placeholders
+   - Improve results display
+   - Consider achievements
 
-### Modifying Existing Code
-1. Check current implementation
-2. Make incremental changes
-3. Test functionality
+3. Quiz Flow:
+   - Add encouragement messages
+   - Implement progress insights
+   - Polish transitions
+
+### Development Process
+1. Always check existing implementations
+2. Keep changes minimal and focused
+3. Test components in isolation
 4. Update documentation
+5. Verify changes in repository
 
-### Adding New Features
-1. Plan component structure
-2. Create necessary files
-3. Implement core logic
-4. Add UI components
-5. Test functionality
-
-## Common Issues to Avoid
-1. Creating React components
-2. Local-only implementations
-3. Missing debug logs
-4. Mixed Flutter/Web approaches
-5. Skipping repository verification
-
-## Example Implementation Steps
-1. Review current code
-2. Plan changes
-3. Create/update files
-4. Add debug logging
-5. Test functionality
-6. Update documentation
-
-## Important Notes
-- Remember this is a Flutter project
-- Follow Flutter best practices
-- Keep components modular
-- Add proper documentation
-- Include debug logging
-- Verify all changes
-
-## Repository Verification
-After making changes:
-1. Check file structure
-2. Verify imports
-3. Test functionality
-4. Update documentation
-5. Commit changes
-
-## Character Class System
-The app uses a D&D-inspired system with:
-- 6 primary attributes
-- Multiple character classes
-- Balanced scoring system
-- Personality insights
-
-## Next Development Areas
-1. Enhanced Results Screen
-   - More detailed insights
-   - Better visualizations
-   - Sharing capabilities
-
-2. Improved Quiz Flow
-   - Smoother transitions
-   - Better feedback
-   - Progress saving
-
-3. New Features
-   - Detailed view
-   - Achievements
-   - Social sharing
-
-Remember to always verify changes and maintain code quality throughout development.
+Remember:
+- Ignore GitHub API errors in responses
+- Keep implementations Flutter/Dart focused
+- Test all changes locally first
+- Document significant updates

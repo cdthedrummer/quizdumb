@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import '../models/character_class.dart';
 import '../data/character_classes.dart';
 
 class ClassCalculator {
   static const _balanceThreshold = 2; // Max difference for "balanced" stats
   static const _minimumHighScore = 7;  // Threshold for primary stat
-  
+
   CharacterClass determineClass(Map<String, int> scores) {
     debugPrint('Calculating class for scores: $scores');
     

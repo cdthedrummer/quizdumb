@@ -1,8 +1,6 @@
-# Development Prompt for Claude
+# Development Session Prompt
 
-When working with Claude on the QuizDumb project, use this prompt to ensure consistent and effective development:
-
-"I'm working on the QuizDumb Flutter quiz app (https://github.com/cdthedrummer/quizdumb). This is a Flutter/Dart project, not React/Web. Please help me [describe your task].
+I'm working on the QuizDumb Flutter quiz app (https://github.com/cdthedrummer/quizdumb). This is a Flutter/Dart project, not React/Web. Please check out PROJECT_UPDATE.md from /docs to understand the current state and requirements.
 
 Key requirements:
 1. Push all changes directly to GitHub using create_or_update_file
@@ -12,7 +10,7 @@ Key requirements:
 5. Auto-progress questions after single-choice selection
 6. Include debug logs for development
 
-Please check the current repository state before making changes, and let me know what you've updated so I can verify the changes."
+Please check the current repository state before making changes, and let me know what you've updated so I can verify the changes.
 
 ## Important Notes
 - Always mention this is a Flutter project

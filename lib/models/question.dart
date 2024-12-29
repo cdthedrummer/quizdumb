@@ -2,7 +2,7 @@ class Question {
   final int id;
   final String text;
   final List<String>? options;
-  final String type;
+  final String type; // 'single', 'multiple', or 'scale'
   final Map<String, Map<String, int>>? attributes;
   final Map<String, int>? scaleAttributes;
 
@@ -15,16 +15,12 @@ class Question {
     this.scaleAttributes,
   });
 
-  // Helper getters
   bool get isMultipleChoice => type == 'multiple';
-  bool get isScale => type == 'scale';
   bool get isSingleChoice => type == 'single';
-
-  // Safely get attribute scores
-  Map<String, Map<String, int>> get attributeScores => attributes ?? {};
+  bool get isScale => type == 'scale';
 
   Map<String, int> calculateScore(dynamic answer) {
-    if (isScale && answer is int && scaleAttributes != null) {
+    if (isScale && answer is int) {
       return _calculateScaleScore(answer);
     } else if (answer is List<String>) {
       return _calculateChoiceScore(answer);
@@ -33,7 +29,7 @@ class Question {
   }
 
   Map<String, int> _calculateScaleScore(int value) {
-    final scores = <String, int>{};
+    Map<String, int> scores = {};
     scaleAttributes?.forEach((attribute, baseValue) {
       scores[attribute] = baseValue * value;
     });
@@ -41,7 +37,7 @@ class Question {
   }
 
   Map<String, int> _calculateChoiceScore(List<String> selectedOptions) {
-    final scores = <String, int>{};
+    Map<String, int> scores = {};
     for (final option in selectedOptions) {
       attributes?[option]?.forEach((attribute, value) {
         scores[attribute] = (scores[attribute] ?? 0) + value;

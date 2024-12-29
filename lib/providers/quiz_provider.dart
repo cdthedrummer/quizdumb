@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/quiz_state.dart';
 
 class QuizProvider extends ChangeNotifier {
-  final QuizState _state;
+  QuizState _state;  // Removed final to allow state updates
+  final int totalQuestions;
 
-  QuizProvider() : _state = QuizState();
+  QuizProvider({this.totalQuestions = 12}) : _state = QuizState();
 
   QuizState get state => _state;
   int get currentIndex => _state.currentIndex;
@@ -13,26 +14,28 @@ class QuizProvider extends ChangeNotifier {
 
   void answerQuestion(dynamic answer) {
     final newAnswers = Map<int, dynamic>.from(_state.answers);
-    if (currentIndex < newAnswers.length) {
-      newAnswers[currentIndex] = answer;
-    } else {
-      newAnswers[currentIndex] = answer;
-    }
+    newAnswers[_state.currentIndex] = answer;
     
-    // Create new state
     _state = QuizState(
       answers: newAnswers,
-      currentIndex: currentIndex + 1,
-      isComplete: currentIndex + 1 >= totalQuestions,
+      currentIndex: _state.currentIndex + 1,
+      isComplete: _state.currentIndex + 1 >= totalQuestions,
     );
     
     notifyListeners();
   }
 
-  // Helper getters and methods
+  void goBack() {
+    if (_state.currentIndex > 0) {
+      _state = QuizState(
+        answers: _state.answers,
+        currentIndex: _state.currentIndex - 1,
+        isComplete: false,
+      );
+      notifyListeners();
+    }
+  }
+
   bool hasAnswer(int index) => _state.answers.containsKey(index);
   dynamic getAnswer(int index) => _state.answers[index];
-  
-  // You'll need to set this based on your questions list length
-  int totalQuestions = 12;  // Default to 12 questions
 }

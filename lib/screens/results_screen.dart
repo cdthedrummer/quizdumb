@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/result.dart';
 import '../models/character_class.dart';
 import '../services/class_calculator.dart';
+import '../widgets/stat_radar_chart.dart';
 
 class ResultsScreen extends StatefulWidget {
   final QuizResult result;
@@ -39,7 +40,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,6 +74,36 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                // Stats Visualization
+                Card(
+                  color: Colors.white.withAlpha(26),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Your Stats',
+                          style: TextStyle(
+                            color: Colors.white.withAlpha(230),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Quicksand',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 300,
+                          child: StatRadarChart(
+                            scores: widget.result.scores,
+                            maxScore: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
                 // Description Card
                 Card(
                   color: Colors.white.withAlpha(51),
@@ -91,36 +122,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Stats Overview (placeholder for radar chart)
-                Text(
-                  'Your Stats',
-                  style: TextStyle(
-                    color: Colors.white.withAlpha(230),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Quicksand',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                // TODO: Add radar chart here
-                Container(
-                  height: 200,
-                  color: Colors.white.withAlpha(26),
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: Center(
-                    child: Text(
-                      'Stats Visualization Coming Soon!',
-                      style: TextStyle(
-                        color: Colors.white.withAlpha(179),
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Spacer(),
-
                 // Navigation Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -130,7 +131,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         debugPrint('Retaking quiz');
                         Navigator.pushNamedAndRemoveUntil(
                           context, 
-                          '/',  // Assuming '/' is your welcome/start screen
+                          '/',
                           (route) => false,
                         );
                       },

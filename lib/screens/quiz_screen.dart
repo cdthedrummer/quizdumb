@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'results_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({Key? key}) : super(key: key);
@@ -9,7 +10,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   int _currentQuestionIndex = 0;
-  Map<int, List<String>> _answers = {};
+  final Map<int, List<String>> _answers = {};
 
   final List<Map<String, dynamic>> _questions = [
     {
@@ -95,7 +96,11 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showResults() {
     debugPrint('Quiz complete!');
-    // TODO: Navigate to results screen
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const ResultsScreen(),
+      ),
+    );
   }
 
   @override
@@ -111,7 +116,7 @@ class _QuizScreenState extends State<QuizScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.8),
+              Theme.of(context).primaryColor.withAlpha(204), // 0.8 opacity
               Theme.of(context).primaryColorDark,
             ],
           ),
@@ -126,14 +131,16 @@ class _QuizScreenState extends State<QuizScreen> {
                   height: 8.0,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4.0),
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withAlpha(26), // 0.1 opacity
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4.0),
                     child: LinearProgressIndicator(
                       value: (_currentQuestionIndex + 1) / _questions.length,
                       backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.7)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.white.withAlpha(179), // 0.7 opacity
+                      ),
                     ),
                   ),
                 ),
@@ -155,7 +162,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     child: Text(
                       'Select all that apply',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withAlpha(204), // 0.8 opacity
                         fontStyle: FontStyle.italic,
                         fontFamily: 'Quicksand',
                       ),
@@ -177,7 +184,9 @@ class _QuizScreenState extends State<QuizScreen> {
                         child: ElevatedButton(
                           onPressed: () => _handleOptionSelected(option),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isSelected ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.2),
+                            backgroundColor: isSelected 
+                                ? Colors.white.withAlpha(230) // 0.9 opacity
+                                : Colors.white.withAlpha(51), // 0.2 opacity
                             foregroundColor: isSelected ? Colors.purple : Colors.white,
                             padding: const EdgeInsets.all(20),
                             shape: RoundedRectangleBorder(
@@ -201,7 +210,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   ElevatedButton(
                     onPressed: currentAnswers.isNotEmpty ? _handleNext : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.9),
+                      backgroundColor: Colors.white.withAlpha(230), // 0.9 opacity
                       foregroundColor: Colors.purple,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,

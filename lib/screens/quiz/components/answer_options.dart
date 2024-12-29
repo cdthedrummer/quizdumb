@@ -15,15 +15,15 @@ class AnswerOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final options = question.options ?? [];
+    
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: question.options.length,
+      itemCount: options.length,
       itemBuilder: (context, index) {
-        final option = question.options[index];
-        final isSelected = question.isMultipleChoice 
-            ? selectedAnswers.contains(option)
-            : selectedAnswers.firstOrNull == option;
+        final option = options[index];
+        final isSelected = selectedAnswers.contains(option);
         
         return AnimatedPadding(
           duration: const Duration(milliseconds: 200),

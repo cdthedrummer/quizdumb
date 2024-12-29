@@ -15,7 +15,7 @@ final List<Question> quizQuestions = [
   ),
   Question(
     id: 2,
-    text: 'Where\'s your focus when it comes to being healthy?',
+    text: "Where's your focus when it comes to being healthy?",
     options: ['Eating Well', 'Being Active', 'Relaxing', 'Regular Check-ups'],
     type: 'multiple',
     attributes: {
@@ -71,6 +71,55 @@ final List<Question> quizQuestions = [
       'Mental Games': {'Intelligence': 2},
       'Social Activities': {'Charisma': 2},
       'Meditation': {'Wisdom': 2},
+    },
+  ),
+  // Scale questions
+  Question(
+    id: 7,
+    text: 'Do you enjoy working out?',
+    type: 'scale',
+    scaleAttributes: {
+      'Strength': 1,
+    },
+  ),
+  Question(
+    id: 8,
+    text: 'Do you like meeting new people?',
+    type: 'scale',
+    scaleAttributes: {
+      'Charisma': 1,
+    },
+  ),
+  Question(
+    id: 9,
+    text: 'Do you keep up with the news?',
+    type: 'scale',
+    scaleAttributes: {
+      'Wisdom': 1,
+    },
+  ),
+  Question(
+    id: 10,
+    text: 'Do you seek out new experiences?',
+    type: 'scale',
+    scaleAttributes: {
+      'Intelligence': 1,
+    },
+  ),
+  Question(
+    id: 11,
+    text: 'Do you enjoy playing sports?',
+    type: 'scale',
+    scaleAttributes: {
+      'Dexterity': 1,
+    },
+  ),
+  Question(
+    id: 12,
+    text: 'How often do you prioritize your health?',
+    type: 'scale',
+    scaleAttributes: {
+      'Constitution': 1,
     },
   ),
 ];

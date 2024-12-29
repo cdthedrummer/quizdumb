@@ -3,9 +3,8 @@ import '../models/character_class.dart';
 import '../data/character_classes.dart';
 
 class ClassCalculator {
-  static const _balanceThreshold = 2; // Max difference for "balanced" stats
-  static const _minimumHighScore = 7;  // Threshold for primary stat
-
+  static const _balanceThreshold = 3; // Increasing threshold to make Jack of All Trades less common
+  
   CharacterClass determineClass(Map<String, int> scores) {
     debugPrint('Calculating class for scores: $scores');
     
@@ -17,7 +16,7 @@ class ClassCalculator {
     
     // Check for well-rounded character
     if (_isWellRounded(scores)) {
-      debugPrint('Determined as well-rounded character');
+      debugPrint('Character is well-rounded');
       return characterClasses.firstWhere((c) => c.name == 'Jack of All Trades');
     }
     
@@ -36,11 +35,20 @@ class ClassCalculator {
   }
   
   bool _isWellRounded(Map<String, int> scores) {
+    if (scores.isEmpty) {
+      debugPrint('No scores provided');
+      return false;
+    }
+
     var stats = scores.values.toList();
     var maxStat = stats.reduce((max, stat) => max > stat ? max : stat);
     var minStat = stats.reduce((min, stat) => min < stat ? min : stat);
     
-    return (maxStat - minStat) <= _balanceThreshold;
+    var isBalanced = (maxStat - minStat) <= _balanceThreshold;
+    debugPrint('Max stat: $maxStat, Min stat: $minStat, Difference: ${maxStat - minStat}');
+    debugPrint('Is balanced? $isBalanced');
+    
+    return isBalanced;
   }
   
   CharacterClass _findBestMatch(
@@ -48,18 +56,30 @@ class ClassCalculator {
     String secondaryStat, 
     Map<String, int> scores
   ) {
-    // Filter classes that match the primary stat
+    // Find classes matching primary stat
     var potentialClasses = characterClasses.where((c) => 
-      c.primaryStat == primaryStat && 
-      _meetsMinimumRequirements(c, scores)
+      c.primaryStat == primaryStat &&
+      c.name != 'Jack of All Trades' // Explicitly exclude Jack of All Trades
     ).toList();
     
-    debugPrint('Found ${potentialClasses.length} potential classes');
+    debugPrint('Found ${potentialClasses.length} classes with primary stat $primaryStat');
     
-    // If no matches, fall back to Jack of All Trades
+    // If no matches, try finding any class where this is a secondary stat
     if (potentialClasses.isEmpty) {
-      debugPrint('No matching classes found, defaulting to Jack of All Trades');
-      return characterClasses.firstWhere((c) => c.name == 'Jack of All Trades');
+      potentialClasses = characterClasses.where((c) => 
+        c.secondaryStat == primaryStat &&
+        c.name != 'Jack of All Trades'
+      ).toList();
+      debugPrint('Found ${potentialClasses.length} alternative classes');
+    }
+    
+    // If still no matches, default to first class for this stat
+    if (potentialClasses.isEmpty) {
+      debugPrint('No matching classes found, defaulting to first available class');
+      return characterClasses.firstWhere(
+        (c) => c.name != 'Jack of All Trades',
+        orElse: () => characterClasses.first
+      );
     }
     
     // Find best match based on secondary stat
@@ -68,14 +88,7 @@ class ClassCalculator {
       orElse: () => potentialClasses.first
     );
     
-    debugPrint('Best match found: ${bestMatch.name}');
+    debugPrint('Selected class: ${bestMatch.name}');
     return bestMatch;
-  }
-  
-  bool _meetsMinimumRequirements(CharacterClass characterClass, Map<String, int> scores) {
-    return characterClass.minimumStats.entries.every((requirement) {
-      var score = scores[requirement.key] ?? 0;
-      return score >= requirement.value;
-    });
   }
 }

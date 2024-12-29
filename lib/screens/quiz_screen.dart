@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/result.dart';
 import 'results_screen.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -19,22 +20,22 @@ class _QuizScreenState extends State<QuizScreen> {
       'options': ['Reading', 'Watching', 'Doing', 'Group'],
       'type': 'single',
       'attributes': {
-        'Reading': {'intelligence': 2, 'wisdom': 1},
-        'Watching': {'wisdom': 2, 'intelligence': 1},
-        'Doing': {'dexterity': 2, 'strength': 1},
-        'Group': {'charisma': 2, 'wisdom': 1},
+        'Reading': {'Intelligence': 2, 'Wisdom': 1},
+        'Watching': {'Wisdom': 2, 'Intelligence': 1},
+        'Doing': {'Dexterity': 2, 'Strength': 1},
+        'Group': {'Charisma': 2, 'Wisdom': 1},
       },
     },
     {
       'id': 2,
-      'text': 'Where\'s your focus when it comes to being healthy?',
+      'text': "Where's your focus when it comes to being healthy?",
       'options': ['Eating Well', 'Being Active', 'Relaxing', 'Regular Check-ups'],
       'type': 'multiple',
       'attributes': {
-        'Eating Well': {'constitution': 2},
-        'Being Active': {'strength': 1, 'dexterity': 1},
-        'Relaxing': {'wisdom': 1},
-        'Regular Check-ups': {'constitution': 2},
+        'Eating Well': {'Constitution': 2},
+        'Being Active': {'Strength': 1, 'Dexterity': 1},
+        'Relaxing': {'Wisdom': 1},
+        'Regular Check-ups': {'Constitution': 2},
       },
     },
     {
@@ -43,13 +44,36 @@ class _QuizScreenState extends State<QuizScreen> {
       'options': ['Outdoor Adventures', 'Team Sports', 'Solo Workouts', 'Fun Activities'],
       'type': 'single',
       'attributes': {
-        'Outdoor Adventures': {'constitution': 2, 'wisdom': 1},
-        'Team Sports': {'charisma': 2, 'dexterity': 1},
-        'Solo Workouts': {'strength': 2},
-        'Fun Activities': {'dexterity': 2, 'charisma': 1},
+        'Outdoor Adventures': {'Constitution': 2, 'Wisdom': 1},
+        'Team Sports': {'Charisma': 2, 'Dexterity': 1},
+        'Solo Workouts': {'Strength': 2},
+        'Fun Activities': {'Dexterity': 2, 'Charisma': 1},
       },
     },
   ];
+
+  QuizResult _calculateResults() {
+    Map<String, int> scores = {
+      'Strength': 0,
+      'Dexterity': 0,
+      'Constitution': 0,
+      'Intelligence': 0,
+      'Wisdom': 0,
+      'Charisma': 0,
+    };
+
+    _answers.forEach((questionIndex, selectedOptions) {
+      final question = _questions[questionIndex];
+      for (final option in selectedOptions) {
+        final attributes = question['attributes'][option] as Map<String, int>;
+        attributes.forEach((attribute, value) {
+          scores[attribute] = (scores[attribute] ?? 0) + value;
+        });
+      }
+    });
+
+    return QuizResult(scores: scores);
+  }
 
   void _handleOptionSelected(String option) {
     setState(() {
@@ -96,9 +120,11 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _showResults() {
     debugPrint('Quiz complete!');
+    final result = _calculateResults();
+    debugPrint('Final scores: ${result.scores}');
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const ResultsScreen(),
+        builder: (context) => ResultsScreen(result: result),
       ),
     );
   }

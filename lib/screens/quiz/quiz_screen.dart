@@ -24,47 +24,17 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   int _currentIndex = 0;
   final Map<int, dynamic> _answers = {};
-  bool _isAnimating = false;
 
-  void _handleAnswerSelected(dynamic answer) {
-    if (_isAnimating) return;
-
-    HapticFeedback.lightImpact();
+  // State management methods
+  void _handleAnswer(dynamic answer) {
     setState(() {
       _answers[_currentIndex] = answer;
-      
-      // Auto-advance on single choice or scale questions
-      if (widget.questions[_currentIndex].isSingleChoice || 
-          widget.questions[_currentIndex].isScale) {
-        _moveToNext();
+      if (_currentIndex < widget.questions.length - 1) {
+        _currentIndex++;
+      } else {
+        _showResults();
       }
     });
-  }
-
-  void _moveToNext() {
-    if (_currentIndex < widget.questions.length - 1) {
-      setState(() {
-        _isAnimating = true;
-        _currentIndex++;
-      });
-      Future.delayed(const Duration(milliseconds: 300), () {
-        setState(() => _isAnimating = false);
-      });
-    } else {
-      _showResults();
-    }
-  }
-
-  void _moveToPrevious() {
-    if (_currentIndex > 0) {
-      setState(() {
-        _isAnimating = true;
-        _currentIndex--;
-      });
-      Future.delayed(const Duration(milliseconds: 300), () {
-        setState(() => _isAnimating = false);
-      });
-    }
   }
 
   QuizResult _calculateResults() {
@@ -79,37 +49,28 @@ class _QuizScreenState extends State<QuizScreen> {
 
     _answers.forEach((index, answer) {
       final question = widget.questions[index];
-      scores.addAll(
-        question.calculateScore(answer),
-      );
+      if (question.isScale && answer is int) {
+        question.scaleAttributes?.forEach((attribute, baseValue) {
+          scores[attribute] = (scores[attribute] ?? 3) + (baseValue * answer);
+        });
+      } else if (answer is List<String>) {
+        for (final option in answer) {
+          question.attributes?[option]?.forEach((attribute, value) {
+            scores[attribute] = (scores[attribute] ?? 3) + value;
+          });
+        }
+      }
     });
-
-    // Ensure all scores are integers
-    scores = scores.map((key, value) => 
-      MapEntry(key, value.clamp(1, 20).toInt())
-    );
 
     return QuizResult(scores: scores);
   }
 
   void _showResults() {
-    final result = _calculateResults();
     Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => 
-          ResultsScreen(result: result),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve)
-          );
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
+      MaterialPageRoute(
+        builder: (context) => ResultsScreen(
+          result: _calculateResults(),
+        ),
       ),
     );
   }
@@ -129,47 +90,38 @@ class _QuizScreenState extends State<QuizScreen> {
                 ProgressBar(
                   progress: (_currentIndex + 1) / widget.questions.length,
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 24),
-                        Text(
-                          currentQuestion.text,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Quicksand',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 40),
-                        if (currentQuestion.isScale)
-                          ScaleSelector(
-                            value: (currentAnswer as int?) ?? 0,
-                            onChanged: _handleAnswerSelected,
-                          )
-                        else
-                          AnswerOptions(
-                            question: currentQuestion,
-                            selectedAnswers: (currentAnswer as List<String>?) ?? [],
-                            onOptionSelected: (option) => 
-                              _handleAnswerSelected([option]),
-                          ),
-                      ],
-                    ),
+                const SizedBox(height: 20),
+                Text(
+                  currentQuestion.text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w600,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                if (currentQuestion.isMultipleChoice)
-                  NavigationButtons(
-                    canGoBack: _currentIndex > 0,
-                    isLastQuestion: _currentIndex == widget.questions.length - 1,
-                    hasAnswers: currentAnswer != null && 
-                      (currentAnswer as List<String>).isNotEmpty,
-                    onNext: _moveToNext,
-                    onBack: _moveToPrevious,
+                const SizedBox(height: 40),
+                Expanded(
+                  child: currentQuestion.isScale
+                    ? ScaleSelector(
+                        value: (currentAnswer as int?) ?? 0,
+                        onChanged: _handleAnswer,
+                      )
+                    : AnswerOptions(
+                        question: currentQuestion,
+                        selectedAnswers: (currentAnswer as List<String>?) ?? [],
+                        onOptionSelected: (option) => _handleAnswer([option]),
+                      ),
+                ),
+                if (_currentIndex > 0)
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _currentIndex--;
+                      });
+                    },
+                    child: const Text('Back'),
                   ),
               ],
             ),

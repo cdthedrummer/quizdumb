@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'screens/welcome_screen.dart';
 
 void main() {
-  runApp(const QuizApp());
+  runApp(const MyApp());
 }
 
-class QuizApp extends StatelessWidget {
-  const QuizApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Personal Growth Quiz',
+      title: 'QuizDumb',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        primarySwatch: Colors.purple,
+        fontFamily: 'Quicksand',
       ),
       home: const WelcomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

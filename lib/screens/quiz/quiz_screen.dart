@@ -8,6 +8,7 @@ import 'components/progress_bar.dart';
 import 'components/question_card.dart';
 import 'components/answer_options.dart';
 import 'components/navigation_buttons.dart';
+import 'components/scale_selector.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<Question> questions;
@@ -23,7 +24,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
   int _currentQuestionIndex = 0;
-  final Map<int, List<String>> _answers = {};
+  final Map<int, dynamic> _answers = {};  // Can store List<String> or int
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -36,11 +37,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 300),
     );
     _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(_animationController);
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _animationController.reverse();
-      }
-    });
+    _animationController.addListener(_handleAnimationComplete);
+  }
+
+  void _handleAnimationComplete(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _animationController.reverse();
+    }
   }
 
   @override
@@ -49,49 +52,51 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  void _handleScaleSelected(int value) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _answers[_currentQuestionIndex] = value;
+      _moveToNextQuestion();
+    });
+  }
+
   void _handleOptionSelected(String option) {
     HapticFeedback.lightImpact();
     setState(() {
       final currentQuestion = widget.questions[_currentQuestionIndex];
-      if (currentQuestion.type == 'single') {
+      if (currentQuestion.isSingleChoice) {
         _answers[_currentQuestionIndex] = [option];
-        debugPrint('Selected option: $option');
-        
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (_currentQuestionIndex < widget.questions.length - 1) {
-            _animationController.forward();
-            setState(() {
-              _currentQuestionIndex++;
-              debugPrint('Moving to next question');
-            });
-          } else {
-            _showResults();
-          }
-        });
+        _moveToNextQuestion();
       } else {
-        _answers[_currentQuestionIndex] = _answers[_currentQuestionIndex] ?? [];
-        final currentAnswers = _answers[_currentQuestionIndex]!;
+        final currentAnswers = (_answers[_currentQuestionIndex] as List<String>?) ?? [];
         if (currentAnswers.contains(option)) {
           currentAnswers.remove(option);
         } else {
           currentAnswers.add(option);
         }
+        _answers[_currentQuestionIndex] = currentAnswers;
         debugPrint('Updated answers: $_answers');
+      }
+    });
+  }
+
+  void _moveToNextQuestion() {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_currentQuestionIndex < widget.questions.length - 1) {
+        _animationController.forward();
+        setState(() {
+          _currentQuestionIndex++;
+          debugPrint('Moving to next question');
+        });
+      } else {
+        _showResults();
       }
     });
   }
 
   void _handleNext() {
     HapticFeedback.mediumImpact();
-    if (_currentQuestionIndex < widget.questions.length - 1) {
-      _animationController.forward();
-      setState(() {
-        _currentQuestionIndex++;
-        debugPrint('Moving to next question');
-      });
-    } else {
-      _showResults();
-    }
+    _moveToNextQuestion();
   }
 
   QuizResult _calculateResults() {
@@ -106,15 +111,21 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
     debugPrint('Starting with base scores: $scores');
 
-    _answers.forEach((questionIndex, selectedOptions) {
-      debugPrint('Processing question $questionIndex answers: $selectedOptions');
+    _answers.forEach((questionIndex, answer) {
       final question = widget.questions[questionIndex];
-      for (final option in selectedOptions) {
-        final attributes = question.attributes[option]!;
-        attributes.forEach((attribute, value) {
-          scores[attribute] = (scores[attribute] ?? 3) + value;
-          debugPrint('$attribute now at: ${scores[attribute]}');
+      
+      if (question.isScale) {
+        final scaleValue = answer as int;
+        question.scaleAttributes?.forEach((attribute, baseValue) {
+          scores[attribute] = (scores[attribute] ?? 3) + (baseValue * scaleValue);
         });
+      } else {
+        final selectedOptions = answer as List<String>;
+        for (final option in selectedOptions) {
+          question.attributes?[option]?.forEach((attribute, value) {
+            scores[attribute] = (scores[attribute] ?? 3) + value;
+          });
+        }
       }
     });
 
@@ -145,7 +156,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final currentQuestion = widget.questions[_currentQuestionIndex];
-    final currentAnswers = _answers[_currentQuestionIndex] ?? [];
+    final currentAnswer = _answers[_currentQuestionIndex];
 
     return Scaffold(
       body: AnimatedGradientContainer(
@@ -165,18 +176,23 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 
                 Expanded(
                   child: SingleChildScrollView(
-                    child: AnswerOptions(
-                      question: currentQuestion,
-                      selectedAnswers: currentAnswers,
-                      onOptionSelected: _handleOptionSelected,
-                    ),
+                    child: currentQuestion.isScale
+                        ? ScaleSelector(
+                            value: (currentAnswer as int?) ?? 0,
+                            onChanged: _handleScaleSelected,
+                          )
+                        : AnswerOptions(
+                            question: currentQuestion,
+                            selectedAnswers: (currentAnswer as List<String>?) ?? [],
+                            onOptionSelected: _handleOptionSelected,
+                          ),
                   ),
                 ),
                 
-                if (currentQuestion.type == 'multiple')
+                if (currentQuestion.isMultipleChoice)
                   NavigationButtons(
                     isLastQuestion: _currentQuestionIndex == widget.questions.length - 1,
-                    hasAnswers: currentAnswers.isNotEmpty,
+                    hasAnswers: currentAnswer != null && (currentAnswer as List<String>).isNotEmpty,
                     onNext: _handleNext,
                   ),
               ],

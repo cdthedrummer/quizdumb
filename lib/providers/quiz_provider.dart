@@ -1,36 +1,43 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import '../models/quiz_state.dart';
 import '../models/question.dart';
 
 class QuizProvider extends ChangeNotifier {
-  final List<Question> _questions;
-  Map<int, List<int>> _answers = {};
-  int _currentIndex = 0;
+  final List<Question> questions;
+  QuizState _state;
+  
+  QuizProvider({
+    required this.questions,
+  }) : _state = QuizState();
 
-  QuizProvider(this._questions) {
-    debugPrint('Initializing QuizProvider with ${_questions.length} questions');
+  QuizState get state => _state;
+  int get currentIndex => _state.currentIndex;
+  List<dynamic> get answers => _state.answers;
+  bool get isComplete => _state.isComplete;
+
+  void answerQuestion(dynamic answer) {
+    final newAnswers = List<dynamic>.from(_state.answers);
+    if (_state.currentIndex < newAnswers.length) {
+      newAnswers[_state.currentIndex] = answer;
+    } else {
+      newAnswers.add(answer);
+    }
+
+    _state = _state.copyWith(
+      answers: newAnswers,
+      currentIndex: _state.currentIndex + 1,
+      isComplete: _state.currentIndex + 1 >= questions.length,
+    );
+    notifyListeners();
   }
 
-  Question get currentQuestion => _questions[_currentIndex];
-  bool get isLastQuestion => _currentIndex == _questions.length - 1;
-  double get progress => (_currentIndex + 1) / _questions.length;
-  List<int> get currentAnswers => _answers[_currentIndex] ?? [];
-
-  void updateScores(Map<String, num> scores) {
-    debugPrint('Updating scores: $scores');
-    for (var questionIndex in _answers.keys) {
-      final question = _questions[questionIndex];
-      for (var answerIndex in _answers[questionIndex]!) {
-        if (answerIndex >= 0 && answerIndex < question.options.length) {
-          final option = question.options[answerIndex];
-          final attributes = question.attributeScores[option];
-          if (attributes != null) {
-            attributes.forEach((attribute, value) {
-              scores[attribute] = (scores[attribute] ?? 0) + value;
-            });
-          }
-        }
-      }
+  void goBack() {
+    if (_state.currentIndex > 0) {
+      _state = _state.copyWith(
+        currentIndex: _state.currentIndex - 1,
+        isComplete: false,
+      );
+      notifyListeners();
     }
-    notifyListeners();
   }
 }

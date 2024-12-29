@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class QuizProgressBar extends StatelessWidget {
+class ProgressBar extends StatelessWidget {
   final double progress;
 
-  const QuizProgressBar({
+  const ProgressBar({
     Key? key,
     required this.progress,
   }) : super(key: key);
@@ -11,18 +11,19 @@ class QuizProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 8.0,
+      height: 8,
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4.0),
-        color: Colors.white.withAlpha(26),
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4.0),
-        child: LinearProgressIndicator(
-          value: progress,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Colors.white.withAlpha(179),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: progress.clamp(0.0, 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
       ),

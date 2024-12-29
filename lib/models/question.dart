@@ -1,53 +1,37 @@
-import 'package:flutter/foundation.dart';
-
-enum QuestionType {
-  singleChoice,
-  multipleChoice,
-  scale
-}
-
 class Question {
+  final int id;
   final String text;
   final List<String> options;
-  final QuestionType type;
-  final Map<String, List<double>> attributeScores;
-  final bool autoProgress;
+  final String type;
+  final Map<String, Map<String, int>> attributes;
 
   const Question({
+    required this.id,
     required this.text,
     required this.options,
     required this.type,
-    required this.attributeScores,
-    this.autoProgress = true,
+    required this.attributes,
   });
 
-  @override
-  String toString() {
-    if (kDebugMode) {
-      return 'Question(text: $text, type: $type, options: ${options.length})';
-    }
-    return super.toString();
-  }
+  bool get isMultipleChoice => type == 'multiple';
 
-  factory Question.fromJson(Map<String, dynamic> json) {
+  factory Question.fromMap(Map<String, dynamic> map) {
     return Question(
-      text: json['text'] as String,
-      options: List<String>.from(json['options']),
-      type: QuestionType.values.byName(json['type']),
-      attributeScores: Map<String, List<double>>.from(
-        json['attributeScores'].map((key, value) => 
-          MapEntry(key, List<double>.from(value))
+      id: map['id'] as int,
+      text: map['text'] as String,
+      options: List<String>.from(map['options'] as List),
+      type: map['type'] as String,
+      attributes: Map<String, Map<String, int>>.from(
+        (map['attributes'] as Map).map(
+          (key, value) => MapEntry(
+            key as String,
+            Map<String, int>.from(value as Map),
+          ),
         ),
       ),
-      autoProgress: json['autoProgress'] ?? true,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'text': text,
-    'options': options,
-    'type': type.name,
-    'attributeScores': attributeScores,
-    'autoProgress': autoProgress,
-  };
+  @override
+  String toString() => 'Question(id: $id, text: $text, type: $type)';
 }

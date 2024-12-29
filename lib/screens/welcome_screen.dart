@@ -17,6 +17,7 @@ class AttributeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           emoji,
@@ -67,118 +68,121 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: AnimatedGradientContainer(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Welcome to your',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontStyle: FontStyle.italic,
-                    fontFamily: 'Quicksand',
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                    minWidth: constraints.maxWidth,
                   ),
-                ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'NEXT ',
-                      style: TextStyle(
-                        color: Colors.yellow,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                    Text(
-                      'CHAPTER',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Explore untapped talents and\ngain the edge you\'ve been\nlooking for!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontFamily: 'Quicksand',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                
-                // Attribute Icons Grid
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          AttributeIcon(emoji: '💪', label: 'Strength'),
-                          AttributeIcon(emoji: '🧠', label: 'Intelligence'),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          AttributeIcon(emoji: '🔮', label: 'Wisdom'),
-                          AttributeIcon(emoji: '🎾', label: 'Dexterity'),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          AttributeIcon(emoji: '🌟', label: 'Charisma'),
-                          AttributeIcon(emoji: '🛡️', label: 'Constitution'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // Start Button
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: ElevatedButton(
-                    onPressed: () => _startQuiz(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.purple,
+                  child: IntrinsicHeight(
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 16,
+                        horizontal: 24.0,
+                        vertical: 16.0,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      elevation: 4,
-                    ),
-                    child: const Text(
-                      'Begin quest',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Quicksand',
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Welcome to your',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontStyle: FontStyle.italic,
+                                  fontFamily: 'Quicksand',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Image.asset(
+                                'assets/images/welcome_title.png',
+                                height: 60,
+                                fit: BoxFit.contain,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Explore untapped talents and\ngain the edge you\'ve been\nlooking for!',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Quicksand',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                          
+                          // Attribute Icons Grid
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 32.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    AttributeIcon(emoji: '💪', label: 'Strength'),
+                                    AttributeIcon(emoji: '🧠', label: 'Intelligence'),
+                                  ],
+                                ),
+                                SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    AttributeIcon(emoji: '🔮', label: 'Wisdom'),
+                                    AttributeIcon(emoji: '🎾', label: 'Dexterity'),
+                                  ],
+                                ),
+                                SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    AttributeIcon(emoji: '🌟', label: 'Charisma'),
+                                    AttributeIcon(emoji: '🛡️', label: 'Constitution'),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          // Start Button
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: ElevatedButton(
+                              onPressed: () => _startQuiz(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.purple,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                elevation: 4,
+                              ),
+                              child: const Text(
+                                'Begin quest',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Quicksand',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

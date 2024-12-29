@@ -4,6 +4,39 @@ import '../data/questions.dart';
 import '../widgets/animated_gradient_container.dart';
 import 'quiz/quiz_screen.dart';
 
+class AttributeIcon extends StatelessWidget {
+  final String emoji;
+  final String label;
+
+  const AttributeIcon({
+    Key? key,
+    required this.emoji,
+    required this.label,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          emoji,
+          style: const TextStyle(fontSize: 32),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontFamily: 'Quicksand',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
 
@@ -52,24 +85,86 @@ class WelcomeScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // Title Image
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: Image.asset(
-                              'assets/images/welcome_title.png',
-                              width: constraints.maxWidth * 0.8,
-                              fit: BoxFit.contain,
-                            ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Welcome to your',
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(230),
+                                  fontSize: 24,
+                                  fontStyle: FontStyle.italic,
+                                  fontFamily: 'Quicksand',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text(
+                                    'NEXT ',
+                                    style: TextStyle(
+                                      color: Color(0xFFFFD700),  // Yellow color for NEXT
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Quicksand',
+                                    ),
+                                  ),
+                                  Text(
+                                    'CHAPTER',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Quicksand',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Explore untapped talents and\ngain the edge you\'ve been\nlooking for!',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Quicksand',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                           
-                          const Text(
-                            'Explore untapped talents and\ngain the edge you\'ve been\nlooking for!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontFamily: 'Quicksand',
+                          // Attribute Icons Grid
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    AttributeIcon(emoji: '💪', label: 'Strength'),
+                                    AttributeIcon(emoji: '🧠', label: 'Intelligence'),
+                                  ],
+                                ),
+                                SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    AttributeIcon(emoji: '🔮', label: 'Wisdom'),
+                                    AttributeIcon(emoji: '🎾', label: 'Dexterity'),
+                                  ],
+                                ),
+                                SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    AttributeIcon(emoji: '🌟', label: 'Charisma'),
+                                    AttributeIcon(emoji: '🛡️', label: 'Constitution'),
+                                  ],
+                                ),
+                              ],
                             ),
-                            textAlign: TextAlign.center,
                           ),
                           
                           // Start Button

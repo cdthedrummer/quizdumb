@@ -4,44 +4,65 @@ import 'package:flutter/services.dart';
 class NavigationButtons extends StatelessWidget {
   final bool isLastQuestion;
   final bool hasAnswers;
+  final bool canGoBack;
   final VoidCallback onNext;
+  final VoidCallback onBack;
 
   const NavigationButtons({
     Key? key,
     required this.isLastQuestion,
     required this.hasAnswers,
+    this.canGoBack = false,
     required this.onNext,
+    required this.onBack,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
-      opacity: hasAnswers ? 1.0 : 0.7,
-      child: ElevatedButton(
-        onPressed: hasAnswers ? () {
-          HapticFeedback.mediumImpact();
-          onNext();
-        } : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white.withAlpha(230),
-          foregroundColor: Colors.purple,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 32,
-            vertical: 16,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        child: Text(
-          isLastQuestion ? 'See Results' : 'Next',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Quicksand',
-          ),
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (canGoBack)
+            TextButton.icon(
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back, color: Colors.white70),
+              label: const Text(
+                'Back',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontFamily: 'Quicksand',
+                ),
+              ),
+            )
+          else
+            const SizedBox.shrink(),
+          
+          if (hasAnswers)
+            ElevatedButton(
+              onPressed: onNext,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.purple,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                isLastQuestion ? 'Finish' : 'Next',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Quicksand',
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'providers/quiz_provider.dart';
 import 'screens/welcome_screen.dart';
 
 void main() {
@@ -12,19 +10,14 @@ class QuizApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => QuizProvider()),
-      ],
-      child: MaterialApp(
-        title: 'QuizDumb',
-        theme: ThemeData(
-          primarySwatch: Colors.purple,
-          fontFamily: 'Quicksand',
-        ),
-        home: const WelcomeScreen(),
-        debugShowCheckedModeBanner: false,
+    return MaterialApp(
+      title: 'QuizDumb',
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        fontFamily: 'Quicksand',
       ),
+      home: const WelcomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

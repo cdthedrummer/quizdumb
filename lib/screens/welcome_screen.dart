@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/question.dart';
 import 'quiz_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -26,7 +25,7 @@ class WelcomeScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.8),
+              Theme.of(context).primaryColor.withAlpha(204), // 0.8 opacity
               Theme.of(context).primaryColorDark,
             ],
           ),

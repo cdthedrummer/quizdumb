@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import '../models/result.dart';
+import '../models/character_class.dart';
+import '../services/class_calculator.dart';
 
-class ResultsScreen extends StatelessWidget {
-  static const Map<String, String> attributeIcons = {
-    'Strength': '💪',
-    'Dexterity': '🎯',
-    'Constitution': '🛡️',
-    'Intelligence': '🧠',
-    'Wisdom': '🔮',
-    'Charisma': '⭐',
-  };
-
+class ResultsScreen extends StatefulWidget {
   final QuizResult result;
 
-  const ResultsScreen({super.key, required this.result});
+  const ResultsScreen({Key? key, required this.result}) : super(key: key);
+
+  @override
+  State<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  late final CharacterClass characterClass;
+  final ClassCalculator _calculator = ClassCalculator();
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('Calculating character class for scores: ${widget.result.scores}');
+    characterClass = _calculator.determineClass(widget.result.scores);
+    debugPrint('Determined character class: ${characterClass.name}');
+  }
 
   @override
   Widget build(BuildContext context) {
-    final maxScore = result.sortedScores.first.value.toDouble();
-    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -33,130 +40,132 @@ class ResultsScreen extends StatelessWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  '🎯 Quest Complete! 🎯',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'Quicksand',
-                  ),
+                // Character Class Header
+                Text(
+                  characterClass.emoji,
+                  style: const TextStyle(fontSize: 48),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      attributeIcons[result.primaryAttribute] ?? '',
-                      style: const TextStyle(fontSize: 32),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      result.primaryAttribute,
+                Text(
+                  characterClass.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Quicksand',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  characterClass.title,
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(230),
+                    fontSize: 18,
+                    fontStyle: FontStyle.italic,
+                    fontFamily: 'Quicksand',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+
+                // Description Card
+                Card(
+                  color: Colors.white.withAlpha(51),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      characterClass.description,
                       style: const TextStyle(
-                        fontSize: 24,
                         color: Colors.white,
+                        fontSize: 16,
                         fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Stats Overview (placeholder for radar chart)
+                Text(
+                  'Your Stats',
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(230),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Quicksand',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                // TODO: Add radar chart here
+                Container(
+                  height: 200,
+                  color: Colors.white.withAlpha(26),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: Center(
+                    child: Text(
+                      'Stats Visualization Coming Soon!',
+                      style: TextStyle(
+                        color: Colors.white.withAlpha(179),
+                        fontFamily: 'Quicksand',
+                      ),
+                    ),
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Navigation Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        debugPrint('Retaking quiz');
+                        Navigator.pushNamedAndRemoveUntil(
+                          context, 
+                          '/',  // Assuming '/' is your welcome/start screen
+                          (route) => false,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withAlpha(51),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Text(
+                        'Retake Quiz',
+                        style: TextStyle(fontFamily: 'Quicksand'),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        debugPrint('Viewing details');
+                        // TODO: Implement detailed view
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withAlpha(230),
+                        foregroundColor: Colors.purple,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Text(
+                        'View Details',
+                        style: TextStyle(fontFamily: 'Quicksand'),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: result.sortedScores.length,
-                    itemBuilder: (context, index) {
-                      final score = result.sortedScores[index];
-                      final progressValue = score.value / maxScore;
-                      
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(26),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    attributeIcons[score.key] ?? '',
-                                    style: const TextStyle(fontSize: 24),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      score.key,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Quicksand',
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    score.value.toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Quicksand',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: LinearProgressIndicator(
-                                  value: progressValue,
-                                  backgroundColor: Colors.white.withAlpha(26),
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white.withAlpha(204),
-                                  ),
-                                  minHeight: 8,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Theme.of(context).primaryColor,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      'Start New Quest',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),

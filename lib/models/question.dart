@@ -13,6 +13,9 @@ class Question {
     required this.attributes,
   });
 
+  // Add the missing getter
+  Map<String, Map<String, int>> get attributeScores => attributes;
+
   bool get isMultipleChoice => type == 'multiple';
 
   factory Question.fromMap(Map<String, dynamic> map) {

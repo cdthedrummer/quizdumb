@@ -25,7 +25,6 @@ class _QuizScreenState extends State<QuizScreen> {
   int _currentIndex = 0;
   final Map<int, dynamic> _answers = {};
 
-  // State management methods
   void _handleAnswer(dynamic answer) {
     setState(() {
       _answers[_currentIndex] = answer;
@@ -49,9 +48,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
     _answers.forEach((index, answer) {
       final question = widget.questions[index];
-      if (question.isScale && answer is int) {
+      if (question.isScale && answer is double) {
         question.scaleAttributes?.forEach((attribute, baseValue) {
-          scores[attribute] = (scores[attribute] ?? 3) + (baseValue * answer);
+          scores[attribute] = (scores[attribute] ?? 3) + 
+              (baseValue * ((answer.round() - 4) / 3)).round();
         });
       } else if (answer is List<String>) {
         for (final option in answer) {
@@ -105,8 +105,9 @@ class _QuizScreenState extends State<QuizScreen> {
                 Expanded(
                   child: currentQuestion.isScale
                     ? ScaleSelector(
-                        value: (currentAnswer as int?) ?? 0,
+                        value: (currentAnswer as double?) ?? 4.0,
                         onChanged: _handleAnswer,
+                        labels: currentQuestion.scaleLabels,
                       )
                     : AnswerOptions(
                         question: currentQuestion,
@@ -116,12 +117,11 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
                 if (_currentIndex > 0)
                   TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentIndex--;
-                      });
-                    },
-                    child: const Text('Back'),
+                    onPressed: () => setState(() => _currentIndex--),
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(color: Colors.white70),
+                    ),
                   ),
               ],
             ),

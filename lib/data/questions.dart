@@ -1,202 +1,223 @@
 import '../models/question.dart';
 
-final quizQuestions = [
-  // First 4 questions (Single Choice - more distinct and emotionally engaging)
+const quizQuestions = [
+  // Single Choice Questions (First 4)
   Question(
     id: 1,
-    text: "You're having a rough day. What helps you bounce back? 🌟",
+    text: "Bad day. What helps? 🌟",
     type: 'single',
     options: [
-      "Solo gym session 💪",
-      "Deep chat with a friend 💭",
-      "Getting lost in a book 📚",
-      "Creating something new 🎨"
+      "Cook something new 🥘",
+      "Play with pets 🐾",
+      "Fix something broken 🔧",
+      "Go for a drive 🚗",
+      "Write it out 📝"
     ],
     attributes: {
-      "Solo gym session 💪": {'Strength': 2, 'Constitution': 1},
-      "Deep chat with a friend 💭": {'Charisma': 2, 'Wisdom': 1},
-      "Getting lost in a book 📚": {'Intelligence': 2, 'Wisdom': 1},
-      "Creating something new 🎨": {'Dexterity': 2, 'Intelligence': 1},
+      "Cook something new 🥘": {'Dexterity': 1, 'Wisdom': 2},
+      "Play with pets 🐾": {'Wisdom': 2, 'Constitution': 1},
+      "Fix something broken 🔧": {'Intelligence': 2, 'Dexterity': 1},
+      "Go for a drive 🚗": {'Dexterity': 2, 'Constitution': 1},
+      "Write it out 📝": {'Intelligence': 1, 'Wisdom': 2},
     },
   ),
   Question(
     id: 2,
-    text: "Your perfect Saturday morning looks like... ☀️",
+    text: "Your dream superpower? ✨",
     type: 'single',
     options: [
-      "Early workout & protein shake 🏃",
-      "Coffee shop people watching ☕",
-      "Learning something fascinating 🧠",
-      "Exploring somewhere new 🗺️"
+      "Time control ⌛",
+      "Talk to animals 🦊",
+      "Weather control 🌪️",
+      "Heal others 💖"
     ],
     attributes: {
-      "Early workout & protein shake 🏃": {'Strength': 2, 'Constitution': 1},
-      "Coffee shop people watching ☕": {'Charisma': 2, 'Wisdom': 1},
-      "Learning something fascinating 🧠": {'Intelligence': 2, 'Wisdom': 1},
-      "Exploring somewhere new 🗺️": {'Dexterity': 2, 'Wisdom': 1},
+      "Time control ⌛": {'Intelligence': 2, 'Wisdom': 1},
+      "Talk to animals 🦊": {'Wisdom': 2, 'Charisma': 1},
+      "Weather control 🌪️": {'Strength': 2, 'Constitution': 1},
+      "Heal others 💖": {'Wisdom': 2, 'Constitution': 1},
     },
   ),
   Question(
     id: 3,
-    text: "When life throws you a curveball... 🎯",
+    text: "Pick a hobby you've never tried 🎯",
     type: 'single',
     options: [
-      "Take action right away 👊",
-      "Talk it through with others 🤝",
-      "Research all the options 🔍",
-      "Trust your instincts ⭐"
+      "Beekeeping 🐝",
+      "Stand-up comedy 🎤",
+      "Pottery 🏺",
+      "Sky diving 🪂",
+      "Gardening 🌱",
+      "Cooking class 👨‍🍳"
     ],
     attributes: {
-      "Take action right away 👊": {'Strength': 2, 'Dexterity': 1},
-      "Talk it through with others 🤝": {'Charisma': 2, 'Wisdom': 1},
-      "Research all the options 🔍": {'Intelligence': 2, 'Wisdom': 1},
-      "Trust your instincts ⭐": {'Wisdom': 2, 'Dexterity': 1},
+      "Beekeeping 🐝": {'Wisdom': 2, 'Constitution': 1},
+      "Stand-up comedy 🎤": {'Charisma': 2, 'Intelligence': 1},
+      "Pottery 🏺": {'Dexterity': 2, 'Wisdom': 1},
+      "Sky diving 🪂": {'Strength': 1, 'Constitution': 2},
+      "Gardening 🌱": {'Constitution': 2, 'Wisdom': 1},
+      "Cooking class 👨‍🍳": {'Dexterity': 1, 'Charisma': 2},
     },
   ),
   Question(
     id: 4,
-    text: "What makes you lose track of time? ⏰",
+    text: "It's raining. You've got the day off. You... ☔",
     type: 'single',
     options: [
-      "Getting in the zone (sports/exercise) 🏃",
-      "Deep conversations 💭",
-      "Solving puzzles 🧩",
-      "Making things with your hands 🛠️"
+      "Build a blanket fort 🏰",
+      "Bake cookies 🍪",
+      "Call old friends 📞",
+      "Take photos 📸",
+      "Nap time 😴"
     ],
     attributes: {
-      "Getting in the zone (sports/exercise) 🏃": {'Strength': 2, 'Constitution': 1},
-      "Deep conversations 💭": {'Charisma': 2, 'Wisdom': 1},
-      "Solving puzzles 🧩": {'Intelligence': 2, 'Dexterity': 1},
-      "Making things with your hands 🛠️": {'Dexterity': 2, 'Intelligence': 1},
+      "Build a blanket fort 🏰": {'Dexterity': 1, 'Intelligence': 2},
+      "Bake cookies 🍪": {'Dexterity': 2, 'Constitution': 1},
+      "Call old friends 📞": {'Charisma': 2, 'Wisdom': 1},
+      "Take photos 📸": {'Dexterity': 1, 'Wisdom': 2},
+      "Nap time 😴": {'Constitution': 2, 'Wisdom': 1},
     },
   ),
 
   // Scale Questions (Middle 4)
   Question(
     id: 5,
-    text: "How often do you get moving? 💪",
+    text: "How do you handle change? 🔄",
     type: 'scale',
     scaleAttributes: {
-      'Strength': 2,
+      'Wisdom': 2,
       'Constitution': 1,
     },
     scaleLabels: {
-      1: "Rarely",
-      4: "Sometimes",
-      7: "All the time",
+      1: "Avoid it",
+      4: "Roll with it",
+      7: "Bring it on",
     },
   ),
   Question(
     id: 6,
-    text: "How do you feel about meeting new people? 🤝",
+    text: "Do you collect things? 🗃️",
     type: 'scale',
     scaleAttributes: {
-      'Charisma': 2,
+      'Intelligence': 2,
       'Wisdom': 1,
     },
     scaleLabels: {
-      1: "Rather not",
-      4: "It's fine",
-      7: "Love it",
+      1: "Nope",
+      4: "A few things",
+      7: "Big collector",
     },
   ),
   Question(
     id: 7,
-    text: "How often do you try new things? 🌟",
-    type: 'scale',
-    scaleAttributes: {
-      'Dexterity': 1,
-      'Intelligence': 1,
-      'Wisdom': 1,
-    },
-    scaleLabels: {
-      1: "Rarely",
-      4: "Sometimes",
-      7: "Often",
-    },
-  ),
-  Question(
-    id: 8,
-    text: "How's your self-care game? ❤️",
+    text: "How's your green thumb? 🌱",
     type: 'scale',
     scaleAttributes: {
       'Constitution': 2,
       'Wisdom': 1,
     },
     scaleLabels: {
-      1: "Needs work",
-      4: "Not bad",
-      7: "On point",
+      1: "Plant killer",
+      4: "Some alive",
+      7: "Plant whisperer",
+    },
+  ),
+  Question(
+    id: 8,
+    text: "Morning person? 🌅",
+    type: 'scale',
+    scaleAttributes: {
+      'Constitution': 2,
+      'Strength': 1,
+    },
+    scaleLabels: {
+      1: "Night owl",
+      4: "Depends",
+      7: "Early bird",
     },
   ),
 
   // Multiple Choice Questions (Last 4)
   Question(
     id: 9,
-    text: "Pick your stress-busters! 😌",
+    text: "Pick your perfect pets! 🐾",
     type: 'multiple',
     options: [
-      "Get moving 🏃",
-      "Chill out 🧘",
-      "See friends 👥",
-      "Do hobbies 🎨"
+      "Dog 🐕",
+      "Cat 🐱",
+      "Fish 🐠",
+      "Bird 🦜",
+      "Reptile 🦎",
+      "Rabbit 🐰"
     ],
     attributes: {
-      "Get moving 🏃": {'Strength': 1, 'Constitution': 1},
-      "Chill out 🧘": {'Wisdom': 1, 'Constitution': 1},
-      "See friends 👥": {'Charisma': 2},
-      "Do hobbies 🎨": {'Dexterity': 1, 'Intelligence': 1},
+      "Dog 🐕": {'Strength': 1, 'Charisma': 1},
+      "Cat 🐱": {'Wisdom': 2},
+      "Fish 🐠": {'Intelligence': 1, 'Constitution': 1},
+      "Bird 🦜": {'Charisma': 2},
+      "Reptile 🦎": {'Constitution': 2},
+      "Rabbit 🐰": {'Dexterity': 1, 'Wisdom': 1},
     },
   ),
   Question(
     id: 10,
-    text: "What gets you excited? 🤔",
+    text: "What would you save in a fire? 🔥",
     type: 'multiple',
     options: [
-      "Sports 🏃",
-      "Creating 🎨",
-      "Tech stuff 💻",
-      "Nature walks 🌿"
+      "Photo albums 📸",
+      "Family heirlooms 👑",
+      "Favorite clothes 👕",
+      "Electronics 📱",
+      "Art supplies 🎨"
     ],
     attributes: {
-      "Sports 🏃": {'Strength': 1, 'Dexterity': 1},
-      "Creating 🎨": {'Dexterity': 1, 'Intelligence': 1},
-      "Tech stuff 💻": {'Intelligence': 2},
-      "Nature walks 🌿": {'Constitution': 1, 'Wisdom': 1},
+      "Photo albums 📸": {'Wisdom': 2},
+      "Family heirlooms 👑": {'Wisdom': 1, 'Constitution': 1},
+      "Favorite clothes 👕": {'Charisma': 2},
+      "Electronics 📱": {'Intelligence': 2},
+      "Art supplies 🎨": {'Dexterity': 2},
     },
   ),
   Question(
     id: 11,
-    text: "Perfect weekend plans? 🎯",
+    text: "Your dream home must have... 🏠",
     type: 'multiple',
     options: [
-      "Adventure time 🏃",
-      "Relaxing 😌",
-      "Learn stuff 📚",
-      "Friend hangs 🤝"
+      "Big kitchen 🍳",
+      "Secret room 🔐",
+      "Garden 🌺",
+      "Home gym 💪",
+      "Art studio 🎨",
+      "Library 📚"
     ],
     attributes: {
-      "Adventure time 🏃": {'Strength': 1, 'Dexterity': 1},
-      "Relaxing 😌": {'Constitution': 1, 'Wisdom': 1},
-      "Learn stuff 📚": {'Intelligence': 2},
-      "Friend hangs 🤝": {'Charisma': 2},
+      "Big kitchen 🍳": {'Constitution': 1, 'Dexterity': 1},
+      "Secret room 🔐": {'Intelligence': 2},
+      "Garden 🌺": {'Wisdom': 1, 'Constitution': 1},
+      "Home gym 💪": {'Strength': 2},
+      "Art studio 🎨": {'Dexterity': 2},
+      "Library 📚": {'Intelligence': 1, 'Wisdom': 1},
     },
   ),
   Question(
     id: 12,
-    text: "Want to level up in... ⬆️",
+    text: "Pick your fantasy job! 🌟",
     type: 'multiple',
     options: [
-      "Fitness 💪",
-      "People skills 👥",
-      "Creative stuff 🎨",
-      "Brain power 🧠"
+      "Dragon trainer 🐲",
+      "Time traveler ⌛",
+      "Potion master 🧪",
+      "Monster hunter 🗡️",
+      "Cloud sculptor ☁️",
+      "Dream walker 💫"
     ],
     attributes: {
-      "Fitness 💪": {'Strength': 1, 'Constitution': 1},
-      "People skills 👥": {'Charisma': 2},
-      "Creative stuff 🎨": {'Dexterity': 1, 'Intelligence': 1},
-      "Brain power 🧠": {'Intelligence': 1, 'Wisdom': 1},
+      "Dragon trainer 🐲": {'Strength': 1, 'Charisma': 1},
+      "Time traveler ⌛": {'Intelligence': 2},
+      "Potion master 🧪": {'Intelligence': 1, 'Wisdom': 1},
+      "Monster hunter 🗡️": {'Strength': 1, 'Dexterity': 1},
+      "Cloud sculptor ☁️": {'Dexterity': 2},
+      "Dream walker 💫": {'Wisdom': 2},
     },
   ),
 ];

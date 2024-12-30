@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/question.dart';
 import '../../models/result.dart';
+import '../../services/quiz_service.dart';
 import '../../widgets/animated_gradient_container.dart';
 import '../results/results_screen.dart';
 import 'components/answer_options.dart';
@@ -22,6 +23,7 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  final QuizService _quizService = QuizService();
   int _currentIndex = 0;
   final Map<int, dynamic> _answers = {};
 
@@ -79,40 +81,11 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-  QuizResult _calculateResults() {
-    Map<String, int> scores = {
-      'Strength': 3,
-      'Dexterity': 3,
-      'Constitution': 3,
-      'Intelligence': 3,
-      'Wisdom': 3,
-      'Charisma': 3,
-    };
-
-    _answers.forEach((index, answer) {
-      final question = widget.questions[index];
-      if (question.isScale && answer is double) {
-        question.scaleAttributes?.forEach((attribute, baseValue) {
-          scores[attribute] = (scores[attribute] ?? 3) + 
-              (baseValue * ((answer.round() - 4) / 3)).round();
-        });
-      } else if (answer is List<String>) {
-        for (final option in answer) {
-          question.attributes?[option]?.forEach((attribute, value) {
-            scores[attribute] = (scores[attribute] ?? 3) + value;
-          });
-        }
-      }
-    });
-
-    return QuizResult(scores: scores);
-  }
-
   void _showResults() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => ResultsScreen(
-          result: _calculateResults(),
+          result: _quizService.calculateResults(_answers, widget.questions),
         ),
       ),
     );

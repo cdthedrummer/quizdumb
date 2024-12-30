@@ -1,73 +1,73 @@
 import '../models/question.dart';
 
 final quizQuestions = [
-  // Single Choice Questions (First 4)
+  // First 4 questions (Single Choice - more distinct and emotionally engaging)
   Question(
     id: 1,
-    text: "Ready to recharge? Pick your go-to! 🔋",
+    text: "You're having a rough day. What helps you bounce back? 🌟",
     type: 'single',
     options: [
-      "Power up at the gym 💪",
-      "Friend time ☕",
-      "Get lost in a book 📚",
-      "Make something cool 🎨"
+      "Solo gym session 💪",
+      "Deep chat with a friend 💭",
+      "Getting lost in a book 📚",
+      "Creating something new 🎨"
     ],
     attributes: {
-      "Power up at the gym 💪": {'Strength': 2, 'Constitution': 1},
-      "Friend time ☕": {'Charisma': 2, 'Wisdom': 1},
-      "Get lost in a book 📚": {'Intelligence': 2, 'Wisdom': 1},
-      "Make something cool 🎨": {'Dexterity': 2, 'Intelligence': 1},
+      "Solo gym session 💪": {'Strength': 2, 'Constitution': 1},
+      "Deep chat with a friend 💭": {'Charisma': 2, 'Wisdom': 1},
+      "Getting lost in a book 📚": {'Intelligence': 2, 'Wisdom': 1},
+      "Creating something new 🎨": {'Dexterity': 2, 'Intelligence': 1},
     },
   ),
   Question(
     id: 2,
-    text: "Time to have fun! What's your move? 🎉",
+    text: "Your perfect Saturday morning looks like... ☀️",
     type: 'single',
     options: [
-      "Game on! 🏃",
-      "Board game night 🎲",
-      "Learn something new 🧠",
-      "Jam session 🎵"
+      "Early workout & protein shake 🏃",
+      "Coffee shop people watching ☕",
+      "Learning something fascinating 🧠",
+      "Exploring somewhere new 🗺️"
     ],
     attributes: {
-      "Game on! 🏃": {'Dexterity': 2, 'Strength': 1},
-      "Board game night 🎲": {'Intelligence': 2, 'Charisma': 1},
-      "Learn something new 🧠": {'Intelligence': 2, 'Wisdom': 1},
-      "Jam session 🎵": {'Charisma': 2, 'Dexterity': 1},
+      "Early workout & protein shake 🏃": {'Strength': 2, 'Constitution': 1},
+      "Coffee shop people watching ☕": {'Charisma': 2, 'Wisdom': 1},
+      "Learning something fascinating 🧠": {'Intelligence': 2, 'Wisdom': 1},
+      "Exploring somewhere new 🗺️": {'Dexterity': 2, 'Wisdom': 1},
     },
   ),
   Question(
     id: 3,
-    text: "Facing a challenge? What's your style? 💭",
+    text: "When life throws you a curveball... 🎯",
     type: 'single',
     options: [
-      "Just do it! 💪",
-      "Phone a friend 🤝",
-      "Make a plan 📝",
-      "Trust your gut 🎯"
+      "Take action right away 👊",
+      "Talk it through with others 🤝",
+      "Research all the options 🔍",
+      "Trust your instincts ⭐"
     ],
     attributes: {
-      "Just do it! 💪": {'Strength': 2, 'Constitution': 1},
-      "Phone a friend 🤝": {'Charisma': 2, 'Wisdom': 1},
-      "Make a plan 📝": {'Intelligence': 2, 'Wisdom': 1},
-      "Trust your gut 🎯": {'Wisdom': 2, 'Dexterity': 1},
+      "Take action right away 👊": {'Strength': 2, 'Dexterity': 1},
+      "Talk it through with others 🤝": {'Charisma': 2, 'Wisdom': 1},
+      "Research all the options 🔍": {'Intelligence': 2, 'Wisdom': 1},
+      "Trust your instincts ⭐": {'Wisdom': 2, 'Dexterity': 1},
     },
   ),
   Question(
     id: 4,
-    text: "Best way to pick up something new? 📚",
+    text: "What makes you lose track of time? ⏰",
     type: 'single',
     options: [
-      "Jump right in 🏃",
-      "Watch the pros 👀",
-      "Study up 📖",
-      "Learn together 👥"
+      "Getting in the zone (sports/exercise) 🏃",
+      "Deep conversations 💭",
+      "Solving puzzles 🧩",
+      "Making things with your hands 🛠️"
     ],
     attributes: {
-      "Jump right in 🏃": {'Dexterity': 2, 'Strength': 1},
-      "Watch the pros 👀": {'Wisdom': 2, 'Intelligence': 1},
-      "Study up 📖": {'Intelligence': 2, 'Wisdom': 1},
-      "Learn together 👥": {'Charisma': 2, 'Intelligence': 1},
+      "Getting in the zone (sports/exercise) 🏃": {'Strength': 2, 'Constitution': 1},
+      "Deep conversations 💭": {'Charisma': 2, 'Wisdom': 1},
+      "Solving puzzles 🧩": {'Intelligence': 2, 'Dexterity': 1},
+      "Making things with your hands 🛠️": {'Dexterity': 2, 'Intelligence': 1},
     },
   ),
 
@@ -81,9 +81,9 @@ final quizQuestions = [
       'Constitution': 1,
     },
     scaleLabels: {
-      1: 'Rarely',
-      4: 'Sometimes',
-      7: 'All the time',
+      1: "Rarely",
+      4: "Sometimes",
+      7: "All the time",
     },
   ),
   Question(
@@ -95,9 +95,9 @@ final quizQuestions = [
       'Wisdom': 1,
     },
     scaleLabels: {
-      1: 'Rather not',
-      4: 'It's okay',
-      7: 'Love it!',
+      1: "Rather not",
+      4: "It's fine",
+      7: "Love it",
     },
   ),
   Question(
@@ -110,9 +110,9 @@ final quizQuestions = [
       'Wisdom': 1,
     },
     scaleLabels: {
-      1: 'Stick to basics',
-      4: 'Sometimes',
-      7: 'Always game!',
+      1: "Rarely",
+      4: "Sometimes",
+      7: "Often",
     },
   ),
   Question(
@@ -124,9 +124,9 @@ final quizQuestions = [
       'Wisdom': 1,
     },
     scaleLabels: {
-      1: 'Could be better',
-      4: 'Not bad',
-      7: 'On point!',
+      1: "Needs work",
+      4: "Not bad",
+      7: "On point",
     },
   ),
 

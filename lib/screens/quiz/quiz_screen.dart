@@ -25,15 +25,58 @@ class _QuizScreenState extends State<QuizScreen> {
   int _currentIndex = 0;
   final Map<int, dynamic> _answers = {};
 
-  void _handleAnswer(dynamic answer) {
+  void _handleMultiSelect(String option) {
     setState(() {
-      _answers[_currentIndex] = answer;
+      final currentAnswers = List<String>.from(
+        (_answers[_currentIndex] as List<String>?) ?? []
+      );
+
+      if (currentAnswers.contains(option)) {
+        currentAnswers.remove(option);
+      } else {
+        currentAnswers.add(option);
+      }
+      _answers[_currentIndex] = currentAnswers;
+    });
+  }
+
+  void _handleSingleSelect(String option) {
+    setState(() {
+      _answers[_currentIndex] = [option];
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (_currentIndex < widget.questions.length - 1) {
+          setState(() => _currentIndex++);
+        } else {
+          _showResults();
+        }
+      });
+    });
+  }
+
+  void _handleScale(double value) {
+    setState(() {
+      _answers[_currentIndex] = value;
+    });
+  }
+
+  bool _canProceed() {
+    final currentQuestion = widget.questions[_currentIndex];
+    final answer = _answers[_currentIndex];
+    
+    if (currentQuestion.isMultipleChoice) {
+      return (answer as List<String>?)?.isNotEmpty ?? false;
+    }
+    return answer != null;
+  }
+
+  void _proceedToNext() {
+    if (_canProceed()) {
       if (_currentIndex < widget.questions.length - 1) {
-        _currentIndex++;
+        setState(() => _currentIndex++);
       } else {
         _showResults();
       }
-    });
+    }
   }
 
   QuizResult _calculateResults() {
@@ -106,15 +149,45 @@ class _QuizScreenState extends State<QuizScreen> {
                   child: currentQuestion.isScale
                     ? ScaleSelector(
                         value: (currentAnswer as double?) ?? 4.0,
-                        onChanged: _handleAnswer,
+                        onChanged: _handleScale,
                         labels: currentQuestion.scaleLabels,
                       )
                     : AnswerOptions(
                         question: currentQuestion,
                         selectedAnswers: (currentAnswer as List<String>?) ?? [],
-                        onOptionSelected: (option) => _handleAnswer([option]),
+                        onOptionSelected: currentQuestion.isMultipleChoice 
+                          ? _handleMultiSelect 
+                          : _handleSingleSelect,
                       ),
                 ),
+                if (!currentQuestion.isSingleChoice)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: ElevatedButton(
+                      onPressed: _canProceed() ? _proceedToNext : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.9),
+                        foregroundColor: Colors.purple,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        _currentIndex == widget.questions.length - 1 
+                          ? 'See Results' 
+                          : 'Next',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Quicksand',
+                        ),
+                      ),
+                    ),
+                  ),
                 if (_currentIndex > 0)
                   TextButton(
                     onPressed: () => setState(() => _currentIndex--),

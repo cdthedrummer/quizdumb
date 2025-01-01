@@ -1,96 +1,86 @@
 import 'package:flutter/material.dart';
-import '../../../models/question.dart';
 
 class MultipleChoiceQuestion extends StatelessWidget {
-  final Question question;
-  final List<String> selectedOptions;
-  final Function(List<String>) onChanged;
+  final List<String> options;
+  final bool isMultiSelect;
+  final List<String> selectedAnswers;
+  final Function(List<String>) onAnswerSelected;
 
   const MultipleChoiceQuestion({
-    Key? key,
-    required this.question,
-    required this.selectedOptions,
-    required this.onChanged,
-  }) : super(key: key);
-
-  void _toggleOption(String option) {
-    final newSelection = List<String>.from(selectedOptions);
-    if (question.isMultipleChoice) {
-      if (newSelection.contains(option)) {
-        newSelection.remove(option);
-      } else {
-        newSelection.add(option);
-      }
-    } else {
-      newSelection
-        ..clear()
-        ..add(option);
-    }
-    onChanged(newSelection);
-  }
+    super.key,
+    required this.options,
+    required this.isMultiSelect,
+    required this.selectedAnswers,
+    required this.onAnswerSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            question.text,
-            style: theme.textTheme.titleLarge,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        if (question.isMultipleChoice)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              'Select all that apply:',
-              style: theme.textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        const SizedBox(height: 16),
-        ...question.options!.map((option) {
-          final isSelected = selectedOptions.contains(option);
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Material(
-              color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => _toggleOption(option),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        question.isMultipleChoice
-                            ? (isSelected ? Icons.check_box : Icons.check_box_outline_blank)
-                            : (isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked),
-                        color: Colors.white,
+    return ListView.builder(
+      itemCount: options.length,
+      itemBuilder: (context, index) {
+        final option = options[index];
+        final isSelected = selectedAnswers.contains(option);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _handleOptionTap(option),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                    width: 2,
+                  ),
+                  color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+                ),
+                child: Row(
+                  children: [
+                    if (isMultiSelect)
+                      Checkbox(
+                        value: isSelected,
+                        onChanged: (_) => _handleOptionTap(option),
+                      )
+                    else
+                      Radio<bool>(
+                        value: true,
+                        groupValue: isSelected,
+                        onChanged: (_) => _handleOptionTap(option),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          option,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: isSelected ? Colors.white : Colors.white70,
-                          ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        option,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: isSelected ? Theme.of(context).primaryColor : null,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        }).toList(),
-      ],
+          ),
+        );
+      },
     );
+  }
+
+  void _handleOptionTap(String option) {
+    if (isMultiSelect) {
+      final newAnswers = List<String>.from(selectedAnswers);
+      if (selectedAnswers.contains(option)) {
+        newAnswers.remove(option);
+      } else {
+        newAnswers.add(option);
+      }
+      onAnswerSelected(newAnswers);
+    } else {
+      onAnswerSelected([option]);
+    }
   }
 }

@@ -1,35 +1,30 @@
 class Question {
-  final int id;
   final String text;
-  final List<String>? options;
-  final String type;
-  final Map<String, Map<String, int>>? attributes;
-  final Map<String, int>? scaleAttributes;
-  final Map<int, String>? scaleLabels;  // Added this field
+  final List<String> options;
+  final Map<String, int> attributeScores;
+  final bool isMultiSelect;
+  List<int> selectedAnswers = [];
 
-  const Question({
-    required this.id,
+  Question({
     required this.text,
-    required this.type,
-    this.options,
-    this.attributes,
-    this.scaleAttributes,
-    this.scaleLabels,
-  }) : assert(
-          (type == 'scale' && scaleAttributes != null) ||
-          ((type == 'single' || type == 'multiple') &&
-              options != null &&
-              attributes != null),
-        );
+    required this.options,
+    required this.attributeScores,
+    this.isMultiSelect = false,
+  });
 
-  bool get isMultipleChoice => type == 'multiple';
-  bool get isSingleChoice => type == 'single';
-  bool get isScale => type == 'scale';
-
-  String getScaleLabel(int value) {
-    if (isScale && scaleLabels != null && scaleLabels!.containsKey(value)) {
-      return scaleLabels![value]!;
+  void selectAnswer(int index) {
+    if (isMultiSelect) {
+      if (selectedAnswers.contains(index)) {
+        selectedAnswers.remove(index);
+      } else {
+        selectedAnswers.add(index);
+      }
+    } else {
+      selectedAnswers = [index];
     }
-    return value.toString();
   }
+
+  bool isSelected(int index) => selectedAnswers.contains(index);
+  
+  bool get isAnswered => selectedAnswers.isNotEmpty;
 }

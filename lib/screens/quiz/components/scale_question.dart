@@ -1,75 +1,61 @@
 import 'package:flutter/material.dart';
-import '../../../models/question.dart';
 
 class ScaleQuestion extends StatelessWidget {
-  final Question question;
-  final Function(double) onChanged;
-  final double currentValue;
+  final Map<int, String> labels;
+  final int value;
+  final ValueChanged<int> onChanged;
 
   const ScaleQuestion({
-    Key? key,
-    required this.question,
+    super.key,
+    required this.labels,
+    required this.value,
     required this.onChanged,
-    required this.currentValue,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            question.text,
-            style: theme.textTheme.titleLarge,
-            textAlign: TextAlign.center,
+        Text(
+          labels[value] ?? '',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 32),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: Theme.of(context).primaryColor,
+            inactiveTrackColor: Theme.of(context).primaryColor.withOpacity(0.2),
+            thumbColor: Theme.of(context).primaryColor,
+            overlayColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            valueIndicatorColor: Theme.of(context).primaryColor,
+            valueIndicatorTextStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          child: Slider(
+            min: 1,
+            max: 7,
+            divisions: 6,
+            value: value.toDouble(),
+            label: value.toString(),
+            onChanged: (newValue) => onChanged(newValue.round()),
           ),
         ),
         const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    question.getScaleLabel(1),
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  Text(
-                    question.getScaleLabel(7),
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SliderTheme(
-                data: theme.sliderTheme,
-                child: Slider(
-                  value: currentValue,
-                  min: 1.0,
-                  max: 7.0,
-                  divisions: 6,
-                  onChanged: onChanged,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              question.getScaleLabel(currentValue.round()),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              labels[1] ?? '',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
-          ),
+            Text(
+              labels[7] ?? '',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
         ),
       ],
     );

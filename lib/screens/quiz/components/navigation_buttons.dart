@@ -17,7 +17,6 @@ class NavigationButtons extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Previous Button
         TextButton.icon(
           onPressed: onPrevious,
           icon: const Icon(Icons.arrow_back),
@@ -28,7 +27,6 @@ class NavigationButtons extends StatelessWidget {
               : Theme.of(context).primaryColor,
           ),
         ),
-        // Next Button
         ElevatedButton.icon(
           onPressed: showNext ? onNext : null,
           icon: const Icon(Icons.arrow_forward),

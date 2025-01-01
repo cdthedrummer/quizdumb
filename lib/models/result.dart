@@ -1,25 +1,16 @@
 class QuizResult {
   final Map<String, int> scores;
+  final String primaryAttribute;
+  final int totalQuestions;
+  final int answeredQuestions;
 
   const QuizResult({
     required this.scores,
+    required this.primaryAttribute,
+    required this.totalQuestions,
+    required this.answeredQuestions,
   });
 
-  // Get the dominant attribute
-  String get primaryAttribute {
-    String highest = 'Strength';
-    int maxScore = scores['Strength'] ?? 0;
-    
-    scores.forEach((attribute, score) {
-      if (score > maxScore) {
-        highest = attribute;
-        maxScore = score;
-      }
-    });
-    
-    return highest;
-  }
-
-  @override
-  String toString() => 'QuizResult(scores: $scores)';
+  double get completionPercentage => 
+    totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
 }

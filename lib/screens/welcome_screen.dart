@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../data/questions.dart';
-import '../widgets/animated_gradient_container.dart';
+import 'package:provider/provider.dart';
+import '../providers/quiz_provider.dart';
 import 'quiz/quiz_screen.dart';
+import '../widgets/animated_gradient_container.dart';
 
 class AttributeIcon extends StatelessWidget {
   final String emoji;
@@ -41,18 +41,19 @@ class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
 
   void _startQuiz(BuildContext context) {
-    HapticFeedback.mediumImpact();
+    final provider = Provider.of<QuizProvider>(context, listen: false);
+    provider.startQuiz();
+    
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => QuizScreen(
-          questions: quizQuestions,
-        ),
+        pageBuilder: (context, animation, secondaryAnimation) => const QuizScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const curve = Curves.easeInOut;
           var tween = Tween(
             begin: const Offset(1.0, 0.0),
             end: Offset.zero,
           ).chain(CurveTween(curve: curve));
+
           return SlideTransition(
             position: animation.drive(tween),
             child: child,
@@ -75,9 +76,7 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Header
                 Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
                       'assets/images/welcome_title.png',
@@ -100,26 +99,26 @@ class WelcomeScreen extends StatelessWidget {
                 // Attribute Icons Grid
                 Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
+                      children: const [
                         AttributeIcon(emoji: '💪', label: 'Strength'),
                         AttributeIcon(emoji: '🧠', label: 'Intelligence'),
                       ],
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
+                      children: const [
                         AttributeIcon(emoji: '🔮', label: 'Wisdom'),
                         AttributeIcon(emoji: '🎾', label: 'Dexterity'),
                       ],
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
+                      children: const [
                         AttributeIcon(emoji: '🌟', label: 'Charisma'),
                         AttributeIcon(emoji: '🛡️', label: 'Constitution'),
                       ],

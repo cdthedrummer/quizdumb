@@ -1,41 +1,60 @@
-import 'package:flutter/material.dart';
-import '../models/quiz_state.dart';
+import 'package:flutter/foundation.dart';
+import '../models/question.dart';
 
-class QuizProvider extends ChangeNotifier {
-  QuizState _state;  // Removed final to allow state updates
-  final int totalQuestions;
+class QuizProvider with ChangeNotifier {
+  int _currentQuestionIndex = 0;
+  List<Question> _questions = [];
+  Map<String, int> _scores = {
+    'strength': 0,
+    'intelligence': 0,
+    'wisdom': 0,
+    'dexterity': 0,
+    'charisma': 0,
+    'constitution': 0,
+  };
 
-  QuizProvider({this.totalQuestions = 12}) : _state = QuizState();
+  // Getters
+  int get currentQuestionIndex => _currentQuestionIndex;
+  List<Question> get questions => _questions;
+  Map<String, int> get scores => _scores;
+  Question? get currentQuestion => 
+    _questions.isNotEmpty && _currentQuestionIndex < _questions.length 
+      ? _questions[_currentQuestionIndex] 
+      : null;
+  bool get isLastQuestion => _currentQuestionIndex >= _questions.length - 1;
 
-  QuizState get state => _state;
-  int get currentIndex => _state.currentIndex;
-  Map<int, dynamic> get answers => _state.answers;
-  bool get isComplete => _state.isComplete;
-
-  void answerQuestion(dynamic answer) {
-    final newAnswers = Map<int, dynamic>.from(_state.answers);
-    newAnswers[_state.currentIndex] = answer;
-    
-    _state = QuizState(
-      answers: newAnswers,
-      currentIndex: _state.currentIndex + 1,
-      isComplete: _state.currentIndex + 1 >= totalQuestions,
-    );
-    
-    notifyListeners();
-  }
-
-  void goBack() {
-    if (_state.currentIndex > 0) {
-      _state = QuizState(
-        answers: _state.answers,
-        currentIndex: _state.currentIndex - 1,
-        isComplete: false,
-      );
+  // Methods
+  void nextQuestion() {
+    if (!isLastQuestion) {
+      _currentQuestionIndex++;
       notifyListeners();
     }
   }
 
-  bool hasAnswer(int index) => _state.answers.containsKey(index);
-  dynamic getAnswer(int index) => _state.answers[index];
+  void previousQuestion() {
+    if (_currentQuestionIndex > 0) {
+      _currentQuestionIndex--;
+      notifyListeners();
+    }
+  }
+
+  void updateScore(Map<String, int> scoreUpdates) {
+    scoreUpdates.forEach((attribute, value) {
+      _scores[attribute] = (_scores[attribute] ?? 0) + value;
+    });
+    notifyListeners();
+  }
+
+  void resetQuiz() {
+    _currentQuestionIndex = 0;
+    _scores = {
+      'strength': 0,
+      'intelligence': 0,
+      'wisdom': 0,
+      'dexterity': 0,
+      'charisma': 0,
+      'constitution': 0,
+    };
+    notifyListeners();
+  }
 }

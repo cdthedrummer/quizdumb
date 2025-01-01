@@ -1,30 +1,27 @@
 class Question {
+  final int id;
   final String text;
-  final List<String> options;
-  final Map<String, int> attributeScores;
-  final bool isMultiSelect;
-  List<int> selectedAnswers = [];
+  final String type;  // 'single', 'multiple', or 'scale'
+  final List<String>? options;
+  final Map<String, Map<String, int>>? attributes;  // For choice questions
+  final Map<String, int>? scaleAttributes;  // For scale questions
+  final Map<int, String>? scaleLabels;  // For scale questions
 
-  Question({
+  const Question({
+    required this.id,
     required this.text,
-    required this.options,
-    required this.attributeScores,
-    this.isMultiSelect = false,
-  });
+    required this.type,
+    this.options,
+    this.attributes,
+    this.scaleAttributes,
+    this.scaleLabels,
+  }) : assert(
+          (type == 'scale' && scaleAttributes != null && scaleLabels != null) ||
+          (type != 'scale' && options != null && attributes != null),
+          'Question must have either scale attributes or choice options'
+        );
 
-  void selectAnswer(int index) {
-    if (isMultiSelect) {
-      if (selectedAnswers.contains(index)) {
-        selectedAnswers.remove(index);
-      } else {
-        selectedAnswers.add(index);
-      }
-    } else {
-      selectedAnswers = [index];
-    }
-  }
-
-  bool isSelected(int index) => selectedAnswers.contains(index);
-  
-  bool get isAnswered => selectedAnswers.isNotEmpty;
+  bool get isMultipleChoice => type == 'multiple';
+  bool get isSingleChoice => type == 'single';
+  bool get isScale => type == 'scale';
 }

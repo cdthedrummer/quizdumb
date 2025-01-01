@@ -1,14 +1,13 @@
 import 'package:flutter/foundation.dart';
-import '../data/questions.dart';
 import '../models/question.dart';
-
-enum QuizStatus { initial, inProgress, complete }
+import '../models/result.dart';
+import '../data/questions.dart';
 
 class QuizProvider with ChangeNotifier {
-  // State variables
   QuizStatus _status = QuizStatus.initial;
   int _currentQuestionIndex = 0;
   final List<Question> _questions = quizQuestions;
+  final Map<int, List<String>> _answers = {};
   final Map<String, int> _scores = {
     'Strength': 0,
     'Intelligence': 0,
@@ -17,39 +16,36 @@ class QuizProvider with ChangeNotifier {
     'Charisma': 0,
     'Constitution': 0,
   };
-  final Map<int, List<String>> _answers = {};
 
   // Getters
   QuizStatus get status => _status;
   int get currentQuestionIndex => _currentQuestionIndex;
-  List<Question> get questions => _questions;
-  Map<String, int> get scores => Map.unmodifiable(_scores);
+  List<Question> get questions => List.unmodifiable(_questions);
   Question get currentQuestion => _questions[_currentQuestionIndex];
+  Map<String, int> get scores => Map.unmodifiable(_scores);
   bool get isLastQuestion => _currentQuestionIndex >= _questions.length - 1;
   double get progress => (_currentQuestionIndex + 1) / _questions.length;
-  List<String>? getAnswersForQuestion(int questionId) => _answers[questionId];
 
-  // Methods
-  void startQuiz() {
-    _status = QuizStatus.inProgress;
-    _currentQuestionIndex = 0;
-    _scores.updateAll((key, value) => 0);
-    _answers.clear();
-    notifyListeners();
-  }
-
+  // Answer Management
   void answerQuestion(int questionId, dynamic answer) {
-    Question question = _questions.firstWhere((q) => q.id == questionId);
-    
-    if (question.type == 'scale') {
-      _handleScaleAnswer(question, answer as int);
+    final question = _questions.firstWhere((q) => q.id == questionId);
+    List<String> answerList;
+
+    if (answer is int) {
+      answerList = [answer.toString()];
+      _handleScaleAnswer(question, answer);
+    } else if (answer is List<String>) {
+      answerList = answer;
+      _handleChoiceAnswer(question, answer);
     } else {
-      _handleChoiceAnswer(question, answer as List<String>);
+      answerList = [answer.toString()];
     }
-    
-    _answers[questionId] = answer is List ? answer : [answer.toString()];
+
+    _answers[questionId] = answerList;
     notifyListeners();
   }
+
+  List<String>? getAnswerForQuestion(int questionId) => _answers[questionId];
 
   void _handleScaleAnswer(Question question, int value) {
     question.scaleAttributes?.forEach((attribute, weight) {
@@ -58,19 +54,20 @@ class QuizProvider with ChangeNotifier {
   }
 
   void _handleChoiceAnswer(Question question, List<String> selectedOptions) {
-    selectedOptions.forEach((option) {
+    for (final option in selectedOptions) {
       final attributes = question.attributes?[option] ?? {};
-      attributes.forEach((attribute, value) {
-        _scores[attribute] = (_scores[attribute] ?? 0) + value;
-      });
-    });
+      for (final entry in attributes.entries) {
+        _scores[entry.key] = (_scores[entry.key] ?? 0) + entry.value;
+      }
+    }
   }
 
+  // Navigation
   void nextQuestion() {
     if (!isLastQuestion) {
       _currentQuestionIndex++;
       notifyListeners();
-    } else if (_currentQuestionIndex == _questions.length - 1) {
+    } else {
       _status = QuizStatus.complete;
       notifyListeners();
     }
@@ -83,14 +80,28 @@ class QuizProvider with ChangeNotifier {
     }
   }
 
-  void resetQuiz() {
-    _status = QuizStatus.initial;
+  // Quiz State Management
+  void startQuiz() {
+    _status = QuizStatus.inProgress;
     _currentQuestionIndex = 0;
-    _scores.updateAll((key, value) => 0);
     _answers.clear();
+    _resetScores();
     notifyListeners();
   }
 
+  void resetQuiz() {
+    _status = QuizStatus.initial;
+    _currentQuestionIndex = 0;
+    _answers.clear();
+    _resetScores();
+    notifyListeners();
+  }
+
+  void _resetScores() {
+    _scores.updateAll((key, value) => 0);
+  }
+
+  // Results Calculation
   String? getPrimaryAttribute() {
     if (_scores.isEmpty) return null;
     return _scores.entries
@@ -103,4 +114,15 @@ class QuizProvider with ChangeNotifier {
       ..sort((a, b) => b.value.compareTo(a.value));
     return Map.fromEntries(sortedEntries);
   }
+
+  QuizResult getResults() {
+    return QuizResult(
+      scores: Map.from(_scores),
+      primaryAttribute: getPrimaryAttribute() ?? '',
+      totalQuestions: _questions.length,
+      answeredQuestions: _answers.length,
+    );
+  }
 }
+
+enum QuizStatus { initial, inProgress, complete }

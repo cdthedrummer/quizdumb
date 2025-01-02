@@ -38,9 +38,16 @@ class ScaleQuestion extends StatelessWidget {
             thumbColor: Colors.white,
             overlayColor: Colors.white.withAlpha(30),
             valueIndicatorColor: Colors.white.withAlpha(230),
-            valueIndicatorTextStyle: textStyle.copyWith(
+            valueIndicatorTextStyle: const TextStyle(
+              color: Colors.black,  // Changed to black
               fontWeight: FontWeight.bold,
+              fontSize: 18,  // Made larger
+              fontFamily: 'Quicksand',
             ),
+            trackHeight: 4.0,  // Made track slightly thicker
+            tickMarkShape: RoundSliderTickMarkShape(tickMarkRadius: 4),  // Larger dots
+            activeTickMarkColor: Colors.white.withAlpha(230),
+            inactiveTickMarkColor: Colors.white.withAlpha(100),
           ),
           child: Slider(
             min: 1,

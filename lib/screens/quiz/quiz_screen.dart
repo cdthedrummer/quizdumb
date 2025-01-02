@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/question.dart';
 import '../../providers/quiz_provider.dart';
+import '../results/results_screen.dart';
 import 'components/multiple_choice_question.dart';
 import 'components/scale_question.dart';
 import 'components/navigation_buttons.dart';
@@ -15,6 +16,17 @@ class QuizScreen extends StatelessWidget {
     return Consumer<QuizProvider>(
       builder: (context, quizProvider, _) {
         final question = quizProvider.currentQuestion;
+
+        // Check if quiz is complete and navigate to results
+        if (quizProvider.status == QuizStatus.complete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const ResultsScreen(),
+              ),
+            );
+          });
+        }
 
         return Scaffold(
           body: SafeArea(

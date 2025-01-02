@@ -2,37 +2,45 @@ import 'package:flutter/material.dart';
 
 class ProgressBar extends StatelessWidget {
   final double progress;
-  final Color? backgroundColor;
-  final Color? progressColor;
 
   const ProgressBar({
     super.key,
     required this.progress,
-    this.backgroundColor,
-    this.progressColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: backgroundColor ?? Theme.of(context).primaryColor.withOpacity(0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              progressColor ?? Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(30),
             ),
-            minHeight: 8,
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(200),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          '${(progress * 100).round()}% Complete',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).primaryColor,
+          '${(progress * 100).toInt()}% Complete',
+          style: TextStyle(
+            color: Colors.white.withAlpha(200),
+            fontSize: 14,
+            fontFamily: 'Quicksand',
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     );

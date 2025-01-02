@@ -14,23 +14,31 @@ class ScaleQuestion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const textStyle = TextStyle(
+      color: Colors.white,
+      fontFamily: 'Quicksand',
+      fontSize: 16,
+    );
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           labels[value] ?? '',
-          style: Theme.of(context).textTheme.titleLarge,
+          style: textStyle.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 32),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: Theme.of(context).primaryColor,
-            inactiveTrackColor: Theme.of(context).primaryColor.withOpacity(0.2),
-            thumbColor: Theme.of(context).primaryColor,
-            overlayColor: Theme.of(context).primaryColor.withOpacity(0.1),
-            valueIndicatorColor: Theme.of(context).primaryColor,
-            valueIndicatorTextStyle: const TextStyle(
-              color: Colors.white,
+            activeTrackColor: Colors.white.withAlpha(230),
+            inactiveTrackColor: Colors.white.withAlpha(50),
+            thumbColor: Colors.white,
+            overlayColor: Colors.white.withAlpha(30),
+            valueIndicatorColor: Colors.white.withAlpha(230),
+            valueIndicatorTextStyle: textStyle.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -49,11 +57,17 @@ class ScaleQuestion extends StatelessWidget {
           children: [
             Text(
               labels[1] ?? '',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: textStyle.copyWith(
+                fontSize: 14,
+                color: Colors.white.withAlpha(180),
+              ),
             ),
             Text(
               labels[7] ?? '',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: textStyle.copyWith(
+                fontSize: 14,
+                color: Colors.white.withAlpha(180),
+              ),
             ),
           ],
         ),

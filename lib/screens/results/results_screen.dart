@@ -1,19 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/quiz_provider.dart';
-import 'components/stat_radar_chart.dart';
+import '../../widgets/stat_radar_chart.dart';
+import '../../data/character_classes.dart';
+import 'components/trait_list.dart';
 
-class ResultsScreen extends StatelessWidget {
+class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
+
+  @override
+  State<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  CharacterClass _getCharacterClass(Map<String, int> scores) {
+    // Find highest scoring attribute
+    var maxScore = 0;
+    String primaryStat = '';
+    scores.forEach((key, value) {
+      if (value > maxScore) {
+        maxScore = value;
+        primaryStat = key;
+      }
+    });
+
+    // Find matching character class
+    return characterClasses.firstWhere(
+      (c) => c.primaryStat == primaryStat,
+      orElse: () => characterClasses.last, // Default to Jack of All Trades
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<QuizProvider>(
       builder: (context, quizProvider, _) {
         final scores = quizProvider.scores;
-        final primaryAttribute = quizProvider.getPrimaryAttribute();
-        final characterClass = _getCharacterClass(primaryAttribute);
-        
+        final characterClass = _getCharacterClass(scores);
+
         return Scaffold(
           body: Container(
             decoration: const BoxDecoration(
@@ -29,104 +76,145 @@ class ResultsScreen extends StatelessWidget {
             child: SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Character Icon
-                      Icon(
-                        _getCharacterIcon(primaryAttribute),
-                        size: 80,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Character Class Title
-                      Text(
-                        characterClass.title,
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Character Emoji
+                        Text(
+                          characterClass.emoji,
+                          style: const TextStyle(fontSize: 64),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      
-                      // Subtitle
-                      Text(
-                        characterClass.subtitle,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.white70,
-                          fontStyle: FontStyle.italic,
+                        const SizedBox(height: 16),
+                        
+                        // Title
+                        Text(
+                          characterClass.name,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'Quicksand',
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Description Card
-                      Card(
-                        color: Colors.white.withOpacity(0.15),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            characterClass.description,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
+                        const SizedBox(height: 8),
+                        
+                        // Subtitle
+                        Text(
+                          characterClass.title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white.withOpacity(0.9),
+                            fontStyle: FontStyle.italic,
+                            fontFamily: 'Quicksand',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // Description
+                        Card(
+                          color: Colors.white.withOpacity(0.15),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: _buildStyledDescription(characterClass.description),
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      
-                      // Stats Title Card
-                      Card(
-                        color: Colors.white.withOpacity(0.15),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              const Text(
-                                'Your Stats',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                        const SizedBox(height: 32),
+                        
+                        // Stats
+                        Card(
+                          color: Colors.white.withOpacity(0.15),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'Your Stats',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontFamily: 'Quicksand',
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 300,
-                                child: StatRadarChart(
-                                  scores: scores,
-                                  primaryColor: Colors.white,
-                                  backgroundColor: Colors.white24,
+                                const SizedBox(height: 32),
+                                SizedBox(
+                                  height: 300,
+                                  child: StatRadarChart(
+                                    scores: scores,
+                                    primaryColor: Colors.white,
+                                    backgroundColor: Colors.white24,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      
-                      // Retry Button
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          quizProvider.resetQuiz();
-                          Navigator.of(context).popUntil((route) => route.isFirst);
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Try Again'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF5E35B1),
-                          padding: const EdgeInsets.all(16),
+                        const SizedBox(height: 24),
+                        
+                        // Key Traits
+                        _buildTraitSection(
+                          title: 'Key Traits',
+                          icon: Icons.stars,
+                          traits: characterClass.keyTraits,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        
+                        // Growth Areas
+                        _buildTraitSection(
+                          title: 'Growth Areas',
+                          icon: Icons.trending_up,
+                          traits: characterClass.growthAreas,
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // Actions
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                quizProvider.resetQuiz();
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Try Again'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white.withOpacity(0.2),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                // TODO: Implement detailed view
+                              },
+                              icon: const Icon(Icons.auto_awesome),
+                              label: const Text('View Details'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFF5E35B1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -137,69 +225,94 @@ class ResultsScreen extends StatelessWidget {
     );
   }
 
-  IconData _getCharacterIcon(String? attribute) {
-    switch (attribute?.toLowerCase()) {
-      case 'strength':
-        return Icons.fitness_center;
-      case 'intelligence':
-        return Icons.psychology;
-      case 'wisdom':
-        return Icons.auto_awesome;
-      case 'dexterity':
-        return Icons.sports_gymnastics;
-      case 'charisma':
-        return Icons.star;
-      case 'constitution':
-        return Icons.favorite;
-      default:
-        return Icons.person;
+  TextSpan _buildStyledDescription(String description) {
+    final parts = description.split('**');
+    final spans = <TextSpan>[];
+    
+    for (var i = 0; i < parts.length; i++) {
+      if (i % 2 == 0) {
+        spans.add(TextSpan(
+          text: parts[i],
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontFamily: 'Quicksand',
+          ),
+        ));
+      } else {
+        spans.add(TextSpan(
+          text: parts[i],
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Quicksand',
+          ),
+        ));
+      }
     }
+    
+    return TextSpan(children: spans);
   }
 
-  ({String title, String subtitle, String description}) _getCharacterClass(String? attribute) {
-    switch (attribute?.toLowerCase()) {
-      case 'strength':
-        return (
-          title: 'Warrior',
-          subtitle: 'The Path of Power',
-          description: 'You are a natural leader with impressive physical capabilities. Your strength and determination make you excel in challenging situations.',
-        );
-      case 'intelligence':
-        return (
-          title: 'Wizard',
-          subtitle: 'The Seeker of Knowledge',
-          description: 'You are an intellectual powerhouse with an unquenchable thirst for knowledge. Your analytical mind and love for learning make you a natural problem solver and innovator.',
-        );
-      case 'wisdom':
-        return (
-          title: 'Sage',
-          subtitle: 'The Voice of Reason',
-          description: 'Your intuitive understanding and careful consideration of situations make you an excellent advisor and decision maker.',
-        );
-      case 'dexterity':
-        return (
-          title: 'Rogue',
-          subtitle: 'The Master of Finesse',
-          description: 'Your quick reflexes and natural agility make you exceptionally skilled at tasks requiring precision and coordination.',
-        );
-      case 'charisma':
-        return (
-          title: 'Bard',
-          subtitle: 'The Heart of Inspiration',
-          description: 'Your natural charm and social grace make you a born leader and connector. You excel at bringing people together and inspiring others.',
-        );
-      case 'constitution':
-        return (
-          title: 'Guardian',
-          subtitle: 'The Pillar of Strength',
-          description: 'Your resilience and stamina are remarkable. You have excellent self-discipline and maintain a strong focus on personal well-being.',
-        );
-      default:
-        return (
-          title: 'Adventurer',
-          subtitle: 'The Balanced Soul',
-          description: 'You have a well-rounded approach to life, showing potential in multiple areas. Your versatility is your greatest strength.',
-        );
-    }
+  Widget _buildTraitSection({
+    required String title,
+    required IconData icon,
+    required List<String> traits,
+  }) {
+    return Card(
+      color: Colors.white.withOpacity(0.15),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'Quicksand',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...traits.map((trait) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '•',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Quicksand',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      trait,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Quicksand',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )).toList(),
+          ],
+        ),
+      ),
+    );
   }
 }

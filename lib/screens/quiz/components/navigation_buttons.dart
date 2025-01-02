@@ -17,28 +17,73 @@ class NavigationButtons extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        TextButton.icon(
+        TextButton(
           onPressed: onPrevious,
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Previous'),
           style: TextButton.styleFrom(
-            foregroundColor: onPrevious == null 
-              ? Colors.grey 
-              : Theme.of(context).primaryColor,
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: showNext ? onNext : null,
-          icon: const Icon(Icons.arrow_forward),
-          label: const Text('Next'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Colors.white.withAlpha(30),
             foregroundColor: Colors.white,
-            disabledBackgroundColor: Colors.grey.shade300,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
             padding: const EdgeInsets.symmetric(
               horizontal: 24,
               vertical: 12,
             ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.arrow_back,
+                size: 18,
+                color: Colors.white.withAlpha(onPrevious == null ? 100 : 255),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Previous',
+                style: TextStyle(
+                  color: Colors.white.withAlpha(onPrevious == null ? 100 : 255),
+                  fontFamily: 'Quicksand',
+                ),
+              ),
+            ],
+          ),
+        ),
+        TextButton(
+          onPressed: showNext ? onNext : null,
+          style: TextButton.styleFrom(
+            backgroundColor: showNext ? Colors.white : Colors.white.withAlpha(30),
+            foregroundColor: showNext ? Theme.of(context).primaryColor : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 12,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Next',
+                style: TextStyle(
+                  color: showNext 
+                      ? Theme.of(context).primaryColor 
+                      : Colors.white.withAlpha(100),
+                  fontWeight: showNext ? FontWeight.bold : FontWeight.normal,
+                  fontFamily: 'Quicksand',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward,
+                size: 18,
+                color: showNext 
+                    ? Theme.of(context).primaryColor 
+                    : Colors.white.withAlpha(100),
+              ),
+            ],
           ),
         ),
       ],

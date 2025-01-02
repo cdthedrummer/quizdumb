@@ -1,0 +1,11 @@
+QuizDumb v1.0.0
+
+First stable release with complete results screen implementation.
+
+Major Features:
+- D&D-inspired character classes
+- Animated stat visualization
+- Beautiful gradient design
+- Smooth transitions and animations
+
+See CHANGELOG.md for full details.

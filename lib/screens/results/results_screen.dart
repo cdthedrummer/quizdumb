@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/character_class.dart';  // Added missing import
 import '../../providers/quiz_provider.dart';
 import '../../widgets/stat_radar_chart.dart';
 import '../../data/character_classes.dart';
-import 'components/trait_list.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -15,6 +15,7 @@ class ResultsScreen extends StatefulWidget {
 class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _slideAnimation;
   
   @override
   void initState() {
@@ -23,10 +24,20 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
+
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeIn,
     );
+
+    _slideAnimation = Tween<double>(
+      begin: 50.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
+
     _controller.forward();
   }
 
@@ -51,6 +62,71 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
     return characterClasses.firstWhere(
       (c) => c.primaryStat == primaryStat,
       orElse: () => characterClasses.last, // Default to Jack of All Trades
+    );
+  }
+
+  Widget _buildAttributeCard(String title, List<String> items, IconData icon) {
+    return AnimatedBuilder(
+      animation: _slideAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _slideAnimation.value),
+          child: Card(
+            color: Colors.white.withAlpha(38),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(icon, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Quicksand',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...items.map((item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '•',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Quicksand',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            item,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontFamily: 'Quicksand',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -108,7 +184,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                           characterClass.title,
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withAlpha(230),
                             fontStyle: FontStyle.italic,
                             fontFamily: 'Quicksand',
                           ),
@@ -118,7 +194,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                         
                         // Description
                         Card(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withAlpha(38),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: RichText(
@@ -131,7 +207,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                         
                         // Stats
                         Card(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withAlpha(38),
                           child: Padding(
                             padding: const EdgeInsets.all(24.0),
                             child: Column(
@@ -161,18 +237,18 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                         const SizedBox(height: 24),
                         
                         // Key Traits
-                        _buildTraitSection(
-                          title: 'Key Traits',
-                          icon: Icons.stars,
-                          traits: characterClass.keyTraits,
+                        _buildAttributeCard(
+                          'Key Traits',
+                          characterClass.keyTraits,
+                          Icons.stars,
                         ),
                         const SizedBox(height: 16),
                         
                         // Growth Areas
-                        _buildTraitSection(
-                          title: 'Growth Areas',
-                          icon: Icons.trending_up,
-                          traits: characterClass.growthAreas,
+                        _buildAttributeCard(
+                          'Growth Areas',
+                          characterClass.growthAreas,
+                          Icons.trending_up,
                         ),
                         const SizedBox(height: 24),
                         
@@ -188,7 +264,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
                               icon: const Icon(Icons.refresh),
                               label: const Text('Try Again'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.2),
+                                backgroundColor: Colors.white.withAlpha(38),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -253,66 +329,5 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
     }
     
     return TextSpan(children: spans);
-  }
-
-  Widget _buildTraitSection({
-    required String title,
-    required IconData icon,
-    required List<String> traits,
-  }) {
-    return Card(
-      color: Colors.white.withOpacity(0.15),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.white),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'Quicksand',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...traits.map((trait) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '•',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontFamily: 'Quicksand',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      trait,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: 'Quicksand',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )).toList(),
-          ],
-        ),
-      ),
-    );
   }
 }

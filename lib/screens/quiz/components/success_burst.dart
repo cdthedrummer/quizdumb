@@ -18,7 +18,6 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
-  final List<Particle> _particles = [];
 
   @override
   void initState() {
@@ -46,22 +45,25 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
     return Stack(
       children: [
         widget.child,
-        if (_controller.isAnimating) ...[
-          ScaleTransition(
-            scale: _scaleAnimation,
-            child: FadeTransition(
-              opacity: _opacityAnimation,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withAlpha(100),
+        if (_controller.isAnimating)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: FadeTransition(
+                  opacity: _opacityAnimation,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withAlpha(100),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ],
       ],
     );
   }
@@ -79,16 +81,4 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
       _controller.forward(from: 0.0);
     }
   }
-}
-
-class Particle {
-  final double angle;
-  final double speed;
-  final Color color;
-
-  Particle({
-    required this.angle,
-    required this.speed,
-    required this.color,
-  });
 }

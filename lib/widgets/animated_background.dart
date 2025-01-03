@@ -3,10 +3,12 @@ import 'dart:math' as math;
 
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
+  final List<Color> colors;
   
   const AnimatedBackground({
     Key? key,
     required this.child,
+    required this.colors,
   }) : super(key: key);
 
   @override
@@ -54,17 +56,26 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        CustomPaint(
-          painter: BackgroundPainter(
-            shapes: _shapes,
-            animation: _controller,
-          ),
-          size: Size.infinite,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: widget.colors,
         ),
-        widget.child,
-      ],
+      ),
+      child: Stack(
+        children: [
+          CustomPaint(
+            painter: BackgroundPainter(
+              shapes: _shapes,
+              animation: _controller,
+            ),
+            size: Size.infinite,
+          ),
+          widget.child,
+        ],
+      ),
     );
   }
 }
@@ -95,19 +106,17 @@ class BackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withAlpha(25)
       ..style = PaintingStyle.fill;
 
     for (var shape in shapes) {
-      // Update position
       final movement = Offset(
         math.cos(shape.angle) * shape.speed * animation.value,
-        math.sin(shape.angle) * shape.speed * animation.value - 1, // Drift upward
+        math.sin(shape.angle) * shape.speed * animation.value - 1,
       );
       
       shape.position += movement;
 
-      // Reset position if out of bounds
       if (shape.position.dy < -shape.size) {
         shape.position = Offset(
           shape.position.dx,
@@ -115,7 +124,6 @@ class BackgroundPainter extends CustomPainter {
         );
       }
 
-      // Draw shape
       canvas.drawCircle(shape.position, shape.size, paint);
     }
   }

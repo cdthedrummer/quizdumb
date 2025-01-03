@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'shape_data.dart';
 
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
@@ -25,15 +25,71 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
   @override
   void initState() {
     super.initState();
-    // Create initial shapes
     _addShapes(5);
     
-    // Periodically add new shapes
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       if (_shapes.length < 15) {
         _addShapes(1);
       }
     });
+  }
+
+  void _addShapes(int count) {
+    for (var i = 0; i < count; i++) {
+      final controller = AnimationController(
+        duration: Duration(seconds: _random.nextInt(10) + 15),
+        vsync: this,
+      );
+
+      final shapeType = ShapeType.values[_random.nextInt(ShapeType.values.length)];
+      
+      final shape = ShapeData(
+        controller: controller,
+        color: widget.colors[_random.nextInt(widget.colors.length)]
+            .withAlpha((_random.nextDouble() * 155 + 100).toInt()),
+        size: _random.nextDouble() * 40 + 20,
+        position: Offset(
+          _random.nextDouble() * MediaQuery.of(context).size.width,
+          MediaQuery.of(context).size.height + 50,
+        ),
+        shape: shapeType,
+      );
+
+      final animation = Tween<Offset>(
+        begin: shape.position,
+        end: Offset(
+          shape.position.dx + (_random.nextDouble() * 100 - 50),
+          -50.0,
+        ),
+      ).animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeInOut,
+      ));
+
+      animation.addListener(() {
+        if (mounted) {
+          setState(() {
+            shape.position = animation.value;
+          });
+        }
+      });
+
+      animation.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          if (mounted) {
+            setState(() {
+              _shapes.remove(shape);
+              controller.dispose();
+            });
+          }
+        }
+      });
+
+      setState(() {
+        _shapes.add(shape);
+      });
+      controller.forward();
+    }
   }
 
   @override
@@ -44,6 +100,48 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
     }
     super.dispose();
   }
-  
-  // ... rest of your existing code ...
+
+  Widget _buildShape(ShapeData shape) {
+    switch (shape.shape) {
+      case ShapeType.circle:
+        return Container(
+          width: shape.size,
+          height: shape.size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: shape.color,
+          ),
+        );
+      case ShapeType.triangle:
+        return CustomPaint(
+          size: Size(shape.size, shape.size),
+          painter: TrianglePainter(color: shape.color),
+        );
+      case ShapeType.star:
+        return CustomPaint(
+          size: Size(shape.size, shape.size),
+          painter: StarPainter(color: shape.color),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ...widget.colors.isEmpty 
+          ? [] 
+          : _shapes.map((shape) => Positioned(
+              left: shape.position.dx,
+              top: shape.position.dy,
+              child: Transform.rotate(
+                angle: shape.controller.value * 2 * math.pi,
+                child: _buildShape(shape),
+              ),
+            )),
+        widget.child,
+      ],
+    );
+  }
 }

@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/quiz_provider.dart';
 import 'quiz/quiz_screen.dart';
-import '../widgets/animated_gradient_container.dart';
+import '../widgets/animated_background.dart';
 
 class AttributeIcon extends StatelessWidget {
   final String emoji;
   final String label;
 
   const AttributeIcon({
-    Key? key,
+    super.key,
     required this.emoji,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,11 @@ class AttributeIcon extends StatelessWidget {
 }
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
+
+  final List<List<Color>> _gradientColors = const [
+    [Color(0xFF9575CD), Color(0xFF5E35B1)], // Purple theme
+  ];
 
   void _startQuiz(BuildContext context) {
     final provider = Provider.of<QuizProvider>(context, listen: false);
@@ -66,7 +70,8 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedGradientContainer(
+      body: AnimatedBackground(
+        colors: _gradientColors[0],
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(

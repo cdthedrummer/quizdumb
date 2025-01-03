@@ -54,9 +54,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     int index = (progress * (_gradientSets.length - 1)).floor();
     int nextIndex = (index + 1).clamp(0, _gradientSets.length - 1);
     double localProgress = (progress * (_gradientSets.length - 1)) - index;
+    
     return [
-      Color.lerp(_gradientSets[index][0], _gradientSets[nextIndex][0], localProgress)!,
-      Color.lerp(_gradientSets[index][1], _gradientSets[nextIndex][1], localProgress)!,
+      Color.lerp(_gradientSets[index][0], _gradientSets[nextIndex][0], localProgress) ?? _gradientSets[0][0],
+      Color.lerp(_gradientSets[index][1], _gradientSets[nextIndex][1], localProgress) ?? _gradientSets[0][1],
     ];
   }
 
@@ -64,7 +65,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     final quizProvider = Provider.of<QuizProvider>(context, listen: false);
     quizProvider.answerQuestion(question.id, answer);
     
-    // Trigger both effects
     setState(() {
       _showSparkles = true;
       _showBurst = true;
@@ -79,7 +79,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       }
     });
     
-    // Auto-progress for single-select questions
     if (!question.isMultipleChoice && !question.isScale) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
@@ -107,48 +106,55 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           });
         }
 
-        return Scaffold(
-          body: AnimatedBackground(
-            colors: currentColors,
-            child: SparkleOverlay(
-              triggerEffect: _showSparkles,
-              child: SuccessBurst(
-                trigger: _showBurst,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          ProgressBar(progress: currentProgress),
-                          const SizedBox(height: 24),
-                          Text(
-                            question.text,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontFamily: 'Quicksand',
-                            ),
-                            textAlign: TextAlign.center,
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: AnimatedBackground(
+              colors: currentColors,
+              child: Material(
+                type: MaterialType.transparency,
+                child: SparkleOverlay(
+                  triggerEffect: _showSparkles,
+                  child: SuccessBurst(
+                    trigger: _showBurst,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ProgressBar(progress: currentProgress),
+                              const SizedBox(height: 24),
+                              Text(
+                                question.text,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Quicksand',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 32),
+                              Expanded(
+                                child: _buildQuestionWidget(
+                                  question,
+                                  quizProvider,
+                                ),
+                              ),
+                              NavigationButtons(
+                                onPrevious: quizProvider.currentQuestionIndex > 0
+                                    ? () => quizProvider.previousQuestion()
+                                    : null,
+                                onNext: () => quizProvider.nextQuestion(),
+                                showNext: _canMoveNext(quizProvider),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 32),
-                          Expanded(
-                            child: _buildQuestionWidget(
-                              question,
-                              quizProvider,
-                            ),
-                          ),
-                          NavigationButtons(
-                            onPrevious: quizProvider.currentQuestionIndex > 0
-                                ? () => quizProvider.previousQuestion()
-                                : null,
-                            onNext: () => quizProvider.nextQuestion(),
-                            showNext: _canMoveNext(quizProvider),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

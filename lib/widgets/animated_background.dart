@@ -18,7 +18,7 @@ class AnimatedBackground extends StatefulWidget {
 class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProviderStateMixin {
   late final AnimationController _controller;
   final List<BackgroundShape> _shapes = [];
-  static const int numberOfShapes = 15; // More particles but smaller
+  static const int numberOfShapes = 15;
 
   @override
   void initState() {
@@ -38,10 +38,10 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
         BackgroundShape(
           position: Offset(
             random.nextDouble() * 300,
-            random.nextDouble() * 600,
+            300 + random.nextDouble() * 300, // Start from middle of screen
           ),
-          size: 5 + random.nextDouble() * 10, // Smaller size range
-          speed: 0.5 + random.nextDouble(), // Slower movement
+          size: 2 + random.nextDouble() * 5, // Much smaller particles
+          speed: 0.3 + random.nextDouble() * 0.5, // Slower movement
           angle: random.nextDouble() * 2 * math.pi,
         ),
       );
@@ -65,13 +65,26 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
         ),
       ),
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          Positioned.fill(
+          RepaintBoundary(
             child: CustomPaint(
               painter: BackgroundPainter(
                 shapes: _shapes,
                 animation: _controller,
               ),
+              isComplex: true,
+              willChange: true,
+            ),
+          ),
+          IgnorePointer(
+            child: CustomPaint(
+              painter: BackgroundPainter(
+                shapes: _shapes,
+                animation: _controller,
+              ),
+              isComplex: true,
+              willChange: true,
             ),
           ),
           widget.child,
@@ -107,13 +120,13 @@ class BackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withAlpha(15) // More transparent
+      ..color = Colors.white.withAlpha(10) // More transparent
       ..style = PaintingStyle.fill;
 
     for (var shape in shapes) {
       final movement = Offset(
         math.cos(shape.angle) * shape.speed * animation.value,
-        math.sin(shape.angle) * shape.speed * animation.value - 0.5, // Slower upward drift
+        math.sin(shape.angle) * shape.speed * animation.value - 0.3,
       );
       
       shape.position += movement;

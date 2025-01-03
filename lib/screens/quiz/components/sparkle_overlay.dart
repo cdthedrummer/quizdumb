@@ -29,10 +29,8 @@ class _SparkleOverlayState extends State<SparkleOverlay> with SingleTickerProvid
   }
 
   void _createParticles() {
-    // Clear old particles
     _particles.clear();
     
-    // Create new particles
     for (int i = 0; i < 15; i++) {
       _particles.add(SparkleParticle(
         position: Offset(
@@ -48,24 +46,24 @@ class _SparkleOverlayState extends State<SparkleOverlay> with SingleTickerProvid
       ));
     }
     
-    // Start animation
     Timer.periodic(const Duration(milliseconds: 16), (timer) {
       if (_particles.isEmpty) {
         timer.cancel();
         return;
       }
 
-      setState(() {
-        for (int i = _particles.length - 1; i >= 0; i--) {
-          final particle = _particles[i];
-          particle.update();
-          
-          // Remove particles that have faded out
-          if (particle.alpha <= 0) {
-            _particles.removeAt(i);
+      if (mounted) {
+        setState(() {
+          for (int i = _particles.length - 1; i >= 0; i--) {
+            final particle = _particles[i];
+            particle.update();
+            
+            if (particle.alpha <= 0) {
+              _particles.removeAt(i);
+            }
           }
-        }
-      });
+        });
+      }
     });
   }
 
@@ -74,9 +72,11 @@ class _SparkleOverlayState extends State<SparkleOverlay> with SingleTickerProvid
     return Stack(
       children: [
         widget.child,
-        CustomPaint(
-          painter: SparklePainter(particles: _particles),
-          size: Size.infinite,
+        IgnorePointer(
+          child: CustomPaint(
+            painter: SparklePainter(particles: _particles),
+            size: Size.infinite,
+          ),
         ),
       ],
     );

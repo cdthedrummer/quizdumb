@@ -25,26 +25,34 @@ class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStat
   void didUpdateWidget(SliderTrail oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isDragging && (oldWidget.position != widget.position)) {
-      _updateParticles();
+      _emitParticles();
+    } else if (!widget.isDragging && oldWidget.isDragging) {
+      // Clear particles when drag ends
+      setState(() => _particles.clear());
     }
   }
 
-  void _updateParticles() {
+  void _emitParticles() {
     setState(() {
-      // Add new particles at current position
-      for (int i = 0; i < 2; i++) {
+      // Emit 3-5 particles from the thumb position
+      final numParticles = 3 + _random.nextInt(3);
+      for (int i = 0; i < numParticles; i++) {
+        // Calculate spread angle (-45 to +45 degrees from horizontal)
+        final angle = ((_random.nextDouble() - 0.5) * pi / 2) + 
+            (widget.position.dx > _lastPosition?.dx ? pi : 0); // Adjust based on drag direction
+        
         _particles.add(TrailParticle(
           position: widget.position,
           velocity: Offset(
-            (_random.nextDouble() - 0.5) * 0.5,
-            (_random.nextDouble() - 0.5) * 0.5 - 1,
+            cos(angle) * (1 + _random.nextDouble()),
+            sin(angle) * (1 + _random.nextDouble()),
           ),
-          size: _random.nextDouble() * 2 + 1,
-          maxAge: 0.5 + _random.nextDouble() * 0.3,
+          size: 1.5 + _random.nextDouble(),
+          maxAge: 0.2 + _random.nextDouble() * 0.1, // Shorter lifespan
         ));
       }
 
-      // Update and remove old particles
+      // Update existing particles
       for (int i = _particles.length - 1; i >= 0; i--) {
         final particle = _particles[i];
         particle.update();
@@ -52,8 +60,12 @@ class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStat
           _particles.removeAt(i);
         }
       }
+
+      _lastPosition = widget.position;
     });
   }
+
+  Offset? _lastPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +77,6 @@ class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStat
             child: IgnorePointer(
               child: CustomPaint(
                 painter: TrailPainter(particles: _particles),
-                size: Size.infinite,
               ),
             ),
           ),
@@ -90,10 +101,10 @@ class TrailParticle {
 
   void update() {
     position += velocity;
-    age += 0.016; // Roughly 60fps
+    age += 0.016;
   }
 
-  double get opacity => (1 - (age / maxAge));
+  double get opacity => pow((1 - (age / maxAge)), 2).toDouble(); // Quadratic fade
 }
 
 class TrailPainter extends CustomPainter {
@@ -105,7 +116,7 @@ class TrailPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final particle in particles) {
       final paint = Paint()
-        ..color = Colors.white.withAlpha((particle.opacity * 30).toInt())
+        ..color = Colors.white.withAlpha((particle.opacity * 40).toInt())
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(particle.position, particle.size, paint);

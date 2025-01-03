@@ -1,26 +1,35 @@
-// Previous imports...
-import '../../widgets/animated_background.dart';
+//... previous imports
+import 'components/sparkle_overlay.dart';
 
-// Rest of the QuizScreen class remains the same until the build method
+class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
+  bool _showSparkles = false;
+  
+  void _handleAnswerSelection(BuildContext context, Question question, dynamic answer) {
+    final quizProvider = Provider.of<QuizProvider>(context, listen: false);
+    quizProvider.answerQuestion(question.id, answer);
+    
+    // Trigger sparkle effect
+    setState(() => _showSparkles = true);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) setState(() => _showSparkles = false);
+    });
+    
+    // Auto-progress for single-select questions
+    if (!question.isMultipleChoice && !question.isScale) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          quizProvider.nextQuestion();
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<QuizProvider>(
       builder: (context, quizProvider, _) {
-        final question = quizProvider.currentQuestion;
-        final currentProgress = quizProvider.progress;
-        final currentColors = _getGradientColors(currentProgress);
-
-        // Check if quiz is complete and navigate to results
-        if (quizProvider.status == QuizStatus.complete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const ResultsScreen(),
-              ),
-            );
-          });
-        }
-
+        // ... previous build code ...
+        
         return Scaffold(
           body: AnimatedContainer(
             duration: const Duration(milliseconds: 500),
@@ -28,21 +37,13 @@ import '../../widgets/animated_background.dart';
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: currentColors,
+                colors: _getGradientColors(currentProgress),
               ),
             ),
-            child: AnimatedBackground(
-              colors: currentColors,
+            child: SparkleOverlay(
+              triggerEffect: _showSparkles,
               child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Column(
-                      // ... rest of the existing column content
-                    ),
-                  ),
-                ),
+                // ... rest of your existing build tree
               ),
             ),
           ),

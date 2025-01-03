@@ -19,6 +19,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   
+  // Define gradient color sets
+  final List<List<Color>> _gradientSets = [
+    [const Color(0xFF9575CD), const Color(0xFF5E35B1)], // Initial purple
+    [const Color(0xFF81C784), const Color(0xFF2E7D32)], // Mid green
+    [const Color(0xFF64B5F6), const Color(0xFF1565C0)], // Final blue
+  ];
+  
   @override
   void initState() {
     super.initState();
@@ -37,6 +44,21 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  // Helper to interpolate between colors based on progress
+  List<Color> _getGradientColors(double progress) {
+    // Determine which color set to interpolate between
+    int index = (progress * (_gradientSets.length - 1)).floor();
+    int nextIndex = (index + 1).clamp(0, _gradientSets.length - 1);
+    
+    // Calculate local progress between these two sets
+    double localProgress = (progress * (_gradientSets.length - 1)) - index;
+    
+    return [
+      Color.lerp(_gradientSets[index][0], _gradientSets[nextIndex][0], localProgress)!,
+      Color.lerp(_gradientSets[index][1], _gradientSets[nextIndex][1], localProgress)!,
+    ];
   }
 
   void _handleAnswerSelection(BuildContext context, Question question, dynamic answer) {
@@ -58,6 +80,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     return Consumer<QuizProvider>(
       builder: (context, quizProvider, _) {
         final question = quizProvider.currentQuestion;
+        final currentProgress = quizProvider.progress;
 
         // Check if quiz is complete and navigate to results
         if (quizProvider.status == QuizStatus.complete) {
@@ -71,15 +94,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         }
 
         return Scaffold(
-          body: Container(
-            decoration: const BoxDecoration(
+          body: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF9575CD), // Light purple
-                  Color(0xFF5E35B1), // Dark purple
-                ],
+                colors: _getGradientColors(currentProgress),
               ),
             ),
             child: SafeArea(
@@ -90,7 +111,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ProgressBar(progress: quizProvider.progress),
+                      ProgressBar(progress: currentProgress),
                       const SizedBox(height: 24),
                       Text(
                         question.text,

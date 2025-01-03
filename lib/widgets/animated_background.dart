@@ -1,151 +1,125 @@
-import 'dart:math' as math;
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'shape_painters.dart';
-import 'shape_data.dart';
+import 'dart:math' as math;
 
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
-  final List<Color> colors;
-
+  
   const AnimatedBackground({
-    super.key,
+    Key? key,
     required this.child,
-    required this.colors,
-  });
+  }) : super(key: key);
 
   @override
   State<AnimatedBackground> createState() => _AnimatedBackgroundState();
 }
 
 class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProviderStateMixin {
-  final List<ShapeData> _shapes = [];
-  Timer? _timer;
-  final math.Random _random = math.Random();
+  late final AnimationController _controller;
+  final List<BackgroundShape> _shapes = [];
+  static const int numberOfShapes = 10;
 
   @override
   void initState() {
     super.initState();
-    _addShapes(5);
-    
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_shapes.length < 15) {
-        _addShapes(1);
-      }
-    });
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+
+    _initializeShapes();
   }
 
-  void _addShapes(int count) {
-    for (var i = 0; i < count; i++) {
-      final controller = AnimationController(
-        duration: Duration(seconds: _random.nextInt(10) + 15),
-        vsync: this,
-      );
-
-      final size = _random.nextDouble() * 40 + 20;
-      final shapeType = ShapeType.values[_random.nextInt(ShapeType.values.length)];
-      
-      final shape = ShapeData(
-        controller: controller,
-        color: widget.colors[_random.nextInt(widget.colors.length)]
-            .withAlpha((_random.nextDouble() * 155 + 100).toInt()),
-        size: size,
-        position: Offset(
-          _random.nextDouble() * MediaQuery.of(context).size.width,
-          MediaQuery.of(context).size.height + 50,
+  void _initializeShapes() {
+    final random = math.Random();
+    for (int i = 0; i < numberOfShapes; i++) {
+      _shapes.add(
+        BackgroundShape(
+          position: Offset(
+            random.nextDouble() * 300,
+            random.nextDouble() * 600,
+          ),
+          size: 20 + random.nextDouble() * 30,
+          speed: 1 + random.nextDouble() * 2,
+          angle: random.nextDouble() * 2 * math.pi,
         ),
-        shape: shapeType,
       );
-
-      final animation = Tween<Offset>(
-        begin: shape.position,
-        end: Offset(
-          shape.position.dx + (_random.nextDouble() * 100 - 50),
-          -50.0,
-        ),
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeInOut,
-      ));
-
-      animation.addListener(() {
-        if (mounted) {
-          setState(() {
-            shape.position = animation.value;
-          });
-        }
-      });
-
-      animation.addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          if (mounted) {
-            setState(() {
-              _shapes.remove(shape);
-              controller.dispose();
-            });
-          }
-        }
-      });
-
-      if (mounted) {
-        setState(() {
-          _shapes.add(shape);
-        });
-      }
-      controller.forward();
     }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    for (var shape in _shapes) {
-      shape.controller.dispose();
-    }
+    _controller.dispose();
     super.dispose();
-  }
-
-  Widget _buildShape(ShapeData shape) {
-    switch (shape.shape) {
-      case ShapeType.circle:
-        return Container(
-          width: shape.size,
-          height: shape.size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: shape.color,
-          ),
-        );
-      case ShapeType.triangle:
-        return CustomPaint(
-          size: Size(shape.size, shape.size),
-          painter: TrianglePainter(color: shape.color),
-        );
-      case ShapeType.star:
-        return CustomPaint(
-          size: Size(shape.size, shape.size),
-          painter: StarPainter(color: shape.color),
-        );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
-      fit: StackFit.expand,
       children: [
-        ...widget.colors.isEmpty 
-          ? [] 
-          : _shapes.map((shape) => Positioned(
-              left: shape.position.dx,
-              top: shape.position.dy,
-              child: Transform.rotate(
-                angle: shape.controller.value * 2 * math.pi,
-                child: _buildShape(shape),
-              ),
-            )),
+        CustomPaint(
+          painter: BackgroundPainter(
+            shapes: _shapes,
+            animation: _controller,
+          ),
+          size: Size.infinite,
+        ),
         widget.child,
       ],
     );
   }
+}
+
+class BackgroundShape {
+  Offset position;
+  final double size;
+  final double speed;
+  final double angle;
+
+  BackgroundShape({
+    required this.position,
+    required this.size,
+    required this.speed,
+    required this.angle,
+  });
+}
+
+class BackgroundPainter extends CustomPainter {
+  final List<BackgroundShape> shapes;
+  final Animation<double> animation;
+
+  BackgroundPainter({
+    required this.shapes,
+    required this.animation,
+  }) : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.fill;
+
+    for (var shape in shapes) {
+      // Update position
+      final movement = Offset(
+        math.cos(shape.angle) * shape.speed * animation.value,
+        math.sin(shape.angle) * shape.speed * animation.value - 1, // Drift upward
+      );
+      
+      shape.position += movement;
+
+      // Reset position if out of bounds
+      if (shape.position.dy < -shape.size) {
+        shape.position = Offset(
+          shape.position.dx,
+          size.height + shape.size,
+        );
+      }
+
+      // Draw shape
+      canvas.drawCircle(shape.position, shape.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class SliderTrail extends StatefulWidget {
@@ -19,7 +19,8 @@ class SliderTrail extends StatefulWidget {
 
 class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStateMixin {
   final List<TrailParticle> _particles = [];
-  final Random _random = Random();
+  final math.Random _random = math.Random();
+  Offset? _lastPosition;
   
   @override
   void didUpdateWidget(SliderTrail oldWidget) {
@@ -27,32 +28,28 @@ class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStat
     if (widget.isDragging && (oldWidget.position != widget.position)) {
       _emitParticles();
     } else if (!widget.isDragging && oldWidget.isDragging) {
-      // Clear particles when drag ends
       setState(() => _particles.clear());
     }
   }
 
   void _emitParticles() {
     setState(() {
-      // Emit 3-5 particles from the thumb position
       final numParticles = 3 + _random.nextInt(3);
       for (int i = 0; i < numParticles; i++) {
-        // Calculate spread angle (-45 to +45 degrees from horizontal)
-        final angle = ((_random.nextDouble() - 0.5) * pi / 2) + 
-            (widget.position.dx > _lastPosition?.dx ? pi : 0); // Adjust based on drag direction
+        final angle = ((_random.nextDouble() - 0.5) * math.pi / 2) + 
+            (_lastPosition != null && widget.position.dx > _lastPosition!.dx ? math.pi : 0);
         
         _particles.add(TrailParticle(
           position: widget.position,
           velocity: Offset(
-            cos(angle) * (1 + _random.nextDouble()),
-            sin(angle) * (1 + _random.nextDouble()),
+            math.cos(angle) * (1 + _random.nextDouble()),
+            math.sin(angle) * (1 + _random.nextDouble()),
           ),
           size: 1.5 + _random.nextDouble(),
-          maxAge: 0.2 + _random.nextDouble() * 0.1, // Shorter lifespan
+          maxAge: 0.2 + _random.nextDouble() * 0.1,
         ));
       }
 
-      // Update existing particles
       for (int i = _particles.length - 1; i >= 0; i--) {
         final particle = _particles[i];
         particle.update();
@@ -64,8 +61,6 @@ class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStat
       _lastPosition = widget.position;
     });
   }
-
-  Offset? _lastPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +99,10 @@ class TrailParticle {
     age += 0.016;
   }
 
-  double get opacity => pow((1 - (age / maxAge)), 2).toDouble(); // Quadratic fade
+  double get opacity {
+    final progress = 1 - (age / maxAge);
+    return progress * progress; // Quadratic fade without pow()
+  }
 }
 
 class TrailPainter extends CustomPainter {

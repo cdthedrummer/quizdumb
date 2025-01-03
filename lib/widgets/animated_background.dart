@@ -18,7 +18,7 @@ class AnimatedBackground extends StatefulWidget {
 class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProviderStateMixin {
   late final AnimationController _controller;
   final List<BackgroundShape> _shapes = [];
-  static const int numberOfShapes = 10;
+  static const int numberOfShapes = 15; // More particles but smaller
 
   @override
   void initState() {
@@ -40,8 +40,8 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
             random.nextDouble() * 300,
             random.nextDouble() * 600,
           ),
-          size: 20 + random.nextDouble() * 30,
-          speed: 1 + random.nextDouble() * 2,
+          size: 5 + random.nextDouble() * 10, // Smaller size range
+          speed: 0.5 + random.nextDouble(), // Slower movement
           angle: random.nextDouble() * 2 * math.pi,
         ),
       );
@@ -66,12 +66,13 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
       ),
       child: Stack(
         children: [
-          CustomPaint(
-            painter: BackgroundPainter(
-              shapes: _shapes,
-              animation: _controller,
+          Positioned.fill(
+            child: CustomPaint(
+              painter: BackgroundPainter(
+                shapes: _shapes,
+                animation: _controller,
+              ),
             ),
-            size: Size.infinite,
           ),
           widget.child,
         ],
@@ -106,13 +107,13 @@ class BackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withAlpha(25)
+      ..color = Colors.white.withAlpha(15) // More transparent
       ..style = PaintingStyle.fill;
 
     for (var shape in shapes) {
       final movement = Offset(
         math.cos(shape.angle) * shape.speed * animation.value,
-        math.sin(shape.angle) * shape.speed * animation.value - 1,
+        math.sin(shape.angle) * shape.speed * animation.value - 0.5, // Slower upward drift
       );
       
       shape.position += movement;

@@ -20,24 +20,21 @@ class ScaleQuestion extends StatefulWidget {
 class _ScaleQuestionState extends State<ScaleQuestion> {
   bool _isDragging = false;
   Offset _dragPosition = Offset.zero;
+  final GlobalKey _sliderKey = GlobalKey();
 
-  void _handleDragStart(DragStartDetails details) {
-    setState(() {
-      _isDragging = true;
-      _dragPosition = details.localPosition;
-    });
+  String _getLabelForValue(int value) {
+    if (value <= 2) return widget.labels[1] ?? '';
+    if (value >= 6) return widget.labels[7] ?? '';
+    return widget.labels[4] ?? '';
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
-    setState(() {
-      _dragPosition = details.localPosition;
-    });
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    setState(() {
-      _isDragging = false;
-    });
+  void _updateDragPosition(Offset globalPosition) {
+    final RenderBox? renderBox = _sliderKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      setState(() {
+        _dragPosition = renderBox.globalToLocal(globalPosition);
+      });
+    }
   }
 
   @override
@@ -51,28 +48,41 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          widget.labels[widget.value] ?? '',
-          style: textStyle.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
+        // Current value label
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: Text(
+            _getLabelForValue(widget.value),
+            key: ValueKey<int>(widget.value),
+            style: textStyle.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         const SizedBox(height: 32),
+        // Slider with trail effect
         SliderTrail(
           isDragging: _isDragging,
           position: _dragPosition,
-          child: GestureDetector(
-            onHorizontalDragStart: _handleDragStart,
-            onHorizontalDragUpdate: _handleDragUpdate,
-            onHorizontalDragEnd: _handleDragEnd,
+          child: Listener(
+            onPointerDown: (event) {
+              setState(() => _isDragging = true);
+              _updateDragPosition(event.position);
+            },
+            onPointerMove: (event) {
+              _updateDragPosition(event.position);
+            },
+            onPointerUp: (event) {
+              setState(() => _isDragging = false);
+            },
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
-                activeTrackColor: Colors.white.withAlpha(230),
-                inactiveTrackColor: Colors.white.withAlpha(50),
+                activeTrackColor: Colors.white.withOpacity(0.9),
+                inactiveTrackColor: Colors.white.withOpacity(0.2),
                 thumbColor: Colors.white,
-                overlayColor: Colors.white.withAlpha(30),
-                valueIndicatorColor: Colors.white.withAlpha(230),
+                overlayColor: Colors.white.withOpacity(0.12),
+                valueIndicatorColor: Colors.white.withOpacity(0.9),
                 valueIndicatorTextStyle: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -85,10 +95,11 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                   elevation: 4.0,
                 ),
                 tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
-                activeTickMarkColor: Colors.white.withAlpha(230),
-                inactiveTickMarkColor: Colors.white.withAlpha(100),
+                activeTickMarkColor: Colors.white.withOpacity(0.9),
+                inactiveTickMarkColor: Colors.white.withOpacity(0.4),
               ),
               child: Slider(
+                key: _sliderKey,
                 min: 1,
                 max: 7,
                 divisions: 6,
@@ -100,6 +111,7 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
           ),
         ),
         const SizedBox(height: 24),
+        // Min and max labels
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -107,14 +119,14 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
               widget.labels[1] ?? '',
               style: textStyle.copyWith(
                 fontSize: 14,
-                color: Colors.white.withAlpha(180),
+                color: Colors.white.withOpacity(0.7),
               ),
             ),
             Text(
               widget.labels[7] ?? '',
               style: textStyle.copyWith(
                 fontSize: 14,
-                color: Colors.white.withAlpha(180),
+                color: Colors.white.withOpacity(0.7),
               ),
             ),
           ],

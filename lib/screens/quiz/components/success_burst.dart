@@ -26,7 +26,7 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200), // Longer animation
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
@@ -38,27 +38,26 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
   void _createParticles(Offset center) {
     _particles.clear();
     
-    // Create many more smaller particles
-    for (int i = 0; i < 50; i++) { // Increased from 30 to 50
-      // Calculate a fountain-like spread angle (-100° to -80° from horizontal)
-      double angle = -math.pi * (0.44 + _random.nextDouble() * 0.12);
+    // Create more particles with fountain effect
+    for (int i = 0; i < 35; i++) {
+      // Calculate angle (-110° to -70° from horizontal for upward fountain)
+      double angle = -math.pi * (0.39 + _random.nextDouble() * 0.22);
       
-      // Vary the initial velocities
-      double speed = 1 + _random.nextDouble() * 3;
+      // Vary initial velocities for natural look
+      double speed = 1 + _random.nextDouble() * 2;
       
-      // Create particle with gravity and drag effects
       _particles.add(BurstParticle(
         position: center,
         velocity: Offset(
           math.cos(angle) * speed,
           math.sin(angle) * speed,
         ),
-        // Add gravity and air resistance
-        acceleration: const Offset(0, 0.15), // Increased gravity
-        drag: 0.97 + _random.nextDouble() * 0.02, // Air resistance
-        size: 0.8 + _random.nextDouble() * 1.2, // Smaller particles (0.8-2px)
-        color: Colors.white.withOpacity(0.04 + _random.nextDouble() * 0.08), // More transparent
-        rotationSpeed: (_random.nextDouble() - 0.5) * 0.2, // Slight rotation
+        acceleration: const Offset(0, 0.12), // Gravity effect
+        size: 0.8 + _random.nextDouble() * 1.2, // Smaller particles
+        // Use withAlpha instead of withOpacity
+        color: Colors.white.withAlpha((_random.nextDouble() * 25 + 5).toInt()),
+        rotationSpeed: (_random.nextDouble() - 0.5) * 0.2,
+        maxAge: 0.8 + _random.nextDouble() * 0.4,
       ));
     }
   }
@@ -103,35 +102,31 @@ class BurstParticle {
   Offset position;
   Offset velocity;
   final Offset acceleration;
-  final double drag;
   final double size;
   final Color color;
   final double rotationSpeed;
+  final double maxAge;
+  double age = 0;
   double rotation = 0;
 
   BurstParticle({
     required this.position,
     required this.velocity,
     required this.acceleration,
-    required this.drag,
     required this.size,
     required this.color,
     required this.rotationSpeed,
+    required this.maxAge,
   });
 
   void update(double progress) {
-    // Apply gravity
     velocity += acceleration;
-    
-    // Apply drag (air resistance)
-    velocity = velocity.scale(drag, drag);
-    
-    // Update position
     position += velocity;
-    
-    // Update rotation
     rotation += rotationSpeed;
+    age = progress * maxAge;
   }
+
+  double get opacity => math.max(0, 1 - (age / maxAge));
 }
 
 class BurstPainter extends CustomPainter {
@@ -149,11 +144,10 @@ class BurstPainter extends CustomPainter {
       particle.update(progress);
       
       final paint = Paint()
-        ..color = particle.color.withOpacity((1 - progress) * 0.8) // Fade out
+        ..color = particle.color.withAlpha((particle.opacity * 25).toInt())
         ..style = PaintingStyle.fill
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8); // Soft glow
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8);
 
-      // Draw with slight rotation for more organic feel
       canvas.save();
       canvas.translate(particle.position.dx, particle.position.dy);
       canvas.rotate(particle.rotation);

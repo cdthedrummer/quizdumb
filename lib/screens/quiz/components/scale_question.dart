@@ -5,12 +5,14 @@ class ScaleQuestion extends StatefulWidget {
   final Map<int, String> labels;
   final int value;
   final ValueChanged<int> onChanged;
+  final VoidCallback? onInteractionEnd;
 
   const ScaleQuestion({
     super.key,
     required this.labels,
     required this.value,
     required this.onChanged,
+    this.onInteractionEnd,
   });
 
   @override
@@ -33,8 +35,8 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     if (renderBox == null) return;
 
     final sliderWidth = renderBox.size.width;
-    final normalizedValue = (widget.value - 1) / 6; // Convert to 0-1 range
-    final xPos = 16 + (sliderWidth - 32) * normalizedValue; // Account for padding
+    final normalizedValue = (widget.value - 1) / 6;
+    final xPos = 16 + (sliderWidth - 32) * normalizedValue;
 
     setState(() {
       _sliderPosition = Offset(xPos, renderBox.size.height / 2);
@@ -60,7 +62,6 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Current value label with animation
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: Text(
@@ -73,7 +74,6 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
           ),
         ),
         const SizedBox(height: 32),
-        // Slider with trail effect
         LayoutBuilder(
           builder: (context, constraints) {
             return Container(
@@ -120,6 +120,7 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                     },
                     onChangeEnd: (value) {
                       setState(() => _isDragging = false);
+                      widget.onInteractionEnd?.call();
                     },
                   ),
                 ),
@@ -128,7 +129,6 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
           },
         ),
         const SizedBox(height: 24),
-        // Min and max labels
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

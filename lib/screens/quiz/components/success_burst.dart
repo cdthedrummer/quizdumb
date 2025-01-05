@@ -29,37 +29,34 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-
-    _controller.addListener(() {
-      if (mounted) setState(() {});
-    });
   }
 
   void _createParticles(Offset center) {
-    _particles.clear();
-    
-    // Create more particles with fountain effect
-    for (int i = 0; i < 35; i++) {
-      // Calculate angle (-110° to -70° from horizontal for upward fountain)
-      double angle = -math.pi * (0.39 + _random.nextDouble() * 0.22);
+    setState(() {
+      _particles.clear();
       
-      // Vary initial velocities for natural look
-      double speed = 1 + _random.nextDouble() * 2;
-      
-      _particles.add(BurstParticle(
-        position: center,
-        velocity: Offset(
-          math.cos(angle) * speed,
-          math.sin(angle) * speed,
-        ),
-        acceleration: const Offset(0, 0.12), // Gravity effect
-        size: 0.8 + _random.nextDouble() * 1.2, // Smaller particles
-        // Use withAlpha instead of withOpacity
-        color: Colors.white.withAlpha((_random.nextDouble() * 25 + 5).toInt()),
-        rotationSpeed: (_random.nextDouble() - 0.5) * 0.2,
-        maxAge: 0.8 + _random.nextDouble() * 0.4,
-      ));
-    }
+      // Create more particles with fountain effect
+      for (int i = 0; i < 50; i++) {
+        // Calculate angle for upward fountain (-110° to -70°)
+        double angle = -math.pi * (0.39 + _random.nextDouble() * 0.22);
+        
+        // Vary initial velocities
+        double speed = 1 + _random.nextDouble() * 2;
+        
+        _particles.add(BurstParticle(
+          position: center,
+          velocity: Offset(
+            math.cos(angle) * speed,
+            math.sin(angle) * speed,
+          ),
+          acceleration: const Offset(0, 0.15), // More gravity
+          size: 1.5 + _random.nextDouble(), // Consistent size
+          alpha: (_random.nextDouble() * 40 + 40).toInt(), // Higher base alpha
+          rotationSpeed: (_random.nextDouble() - 0.5) * 0.2,
+          maxAge: 0.8 + _random.nextDouble() * 0.4,
+        ));
+      }
+    });
   }
 
   @override
@@ -103,7 +100,7 @@ class BurstParticle {
   Offset velocity;
   final Offset acceleration;
   final double size;
-  final Color color;
+  final int alpha;
   final double rotationSpeed;
   final double maxAge;
   double age = 0;
@@ -114,7 +111,7 @@ class BurstParticle {
     required this.velocity,
     required this.acceleration,
     required this.size,
-    required this.color,
+    required this.alpha,
     required this.rotationSpeed,
     required this.maxAge,
   });
@@ -133,7 +130,7 @@ class BurstPainter extends CustomPainter {
   final List<BurstParticle> particles;
   final double progress;
 
-  BurstPainter({
+  const BurstPainter({
     required this.particles,
     required this.progress,
   });
@@ -144,7 +141,7 @@ class BurstPainter extends CustomPainter {
       particle.update(progress);
       
       final paint = Paint()
-        ..color = particle.color.withAlpha((particle.opacity * 25).toInt())
+        ..color = Colors.white.withAlpha((particle.alpha * particle.opacity).toInt())
         ..style = PaintingStyle.fill
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8);
 
@@ -157,5 +154,5 @@ class BurstPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(BurstPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

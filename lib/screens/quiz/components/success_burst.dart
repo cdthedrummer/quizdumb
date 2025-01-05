@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class SuccessBurst extends StatefulWidget {
   final Widget child;
   final bool trigger;
-  final Offset? burstPoint; // Add point to emit from
+  final Offset? burstPoint;
 
   const SuccessBurst({
     Key? key,
@@ -21,12 +21,12 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
   late AnimationController _controller;
   final List<BurstParticle> _particles = [];
   final Random _random = Random();
-
+  
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 800), // Longer animation
       vsync: this,
     );
 
@@ -38,20 +38,24 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
   void _createParticles(Offset center) {
     _particles.clear();
     
-    // Create multiple small particles
-    for (int i = 0; i < 12; i++) {
-      // Calculate angle spread (-30 to +30 degrees from vertical)
-      double angle = -pi/2 + (pi/6 * _random.nextDouble() - pi/12);
-      double speed = 2 + _random.nextDouble() * 2;
+    // Create more, smaller particles
+    for (int i = 0; i < 30; i++) { // Increased from 12 to 30
+      // Calculate angle spread (only upward fountain)
+      double angle = -pi/2 + (pi/3 * _random.nextDouble() - pi/6); // -60° to -120°
       
+      // Vary speeds more for fountain effect
+      double speed = 1 + _random.nextDouble() * 2;
+      
+      // Add gravity effect
       _particles.add(BurstParticle(
         position: center,
         velocity: Offset(
           cos(angle) * speed,
           sin(angle) * speed,
         ),
-        size: 2 + _random.nextDouble() * 3,
-        color: Colors.white.withAlpha((_random.nextDouble() * 50 + 30).toInt()),
+        acceleration: const Offset(0, 0.1), // Gravity
+        size: 1 + _random.nextDouble() * 2, // Smaller particles (1-3px)
+        color: Colors.white.withOpacity(0.1 + _random.nextDouble() * 0.2), // More transparent
       ));
     }
   }
@@ -94,18 +98,21 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
 
 class BurstParticle {
   Offset position;
-  final Offset velocity;
+  Offset velocity;
+  final Offset acceleration;
   final double size;
   final Color color;
 
   BurstParticle({
     required this.position,
     required this.velocity,
+    required this.acceleration,
     required this.size,
     required this.color,
   });
 
   void update(double progress) {
+    velocity += acceleration; // Apply gravity
     position += velocity;
   }
 }
@@ -125,8 +132,9 @@ class BurstPainter extends CustomPainter {
       particle.update(progress);
       
       final paint = Paint()
-        ..color = particle.color.withAlpha(((1 - progress) * 255).toInt())
-        ..style = PaintingStyle.fill;
+        ..color = particle.color.withOpacity(1 - progress)
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5); // Slight glow
 
       canvas.drawCircle(particle.position, particle.size, paint);
     }

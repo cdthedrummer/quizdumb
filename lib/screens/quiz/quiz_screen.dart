@@ -23,6 +23,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   late Animation<double> _fadeAnimation;
   bool _showSparkles = false;
   bool _showBurst = false;
+  bool _isScaleInteracting = false;
 
   final List<List<Color>> _gradientSets = [
     [const Color(0xFF9575CD), const Color(0xFF5E35B1)], // Initial purple
@@ -65,26 +66,29 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     final quizProvider = Provider.of<QuizProvider>(context, listen: false);
     quizProvider.answerQuestion(question.id, answer);
     
-    setState(() {
-      _showSparkles = true;
-      _showBurst = true;
-    });
-    
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _showSparkles = false;
-          _showBurst = false;
-        });
-      }
-    });
-    
-    if (!question.isMultipleChoice && !question.isScale) {
-      Future.delayed(const Duration(milliseconds: 300), () {
+    // Only show effects for non-scale questions
+    if (!question.isScale) {
+      setState(() {
+        _showSparkles = true;
+        _showBurst = true;
+      });
+      
+      Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
-          quizProvider.nextQuestion();
+          setState(() {
+            _showSparkles = false;
+            _showBurst = false;
+          });
         }
       });
+
+      if (!question.isMultipleChoice) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            quizProvider.nextQuestion();
+          }
+        });
+      }
     }
   }
 
@@ -112,6 +116,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
             resizeToAvoidBottomInset: false,
             body: AnimatedBackground(
               colors: currentColors,
+              isEnabled: !_isScaleInteracting, // Disable background when scale is active
               child: Material(
                 type: MaterialType.transparency,
                 child: SparkleOverlay(
@@ -174,7 +179,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         value: provider.getAnswerForQuestion(question.id)?.first != null
             ? int.parse(provider.getAnswerForQuestion(question.id)!.first)
             : 4,
-        onChanged: (value) => _handleAnswerSelection(context, question, value),
+        onChanged: (value) {
+          setState(() => _isScaleInteracting = true);
+          _handleAnswerSelection(context, question, value);
+        },
+        onInteractionEnd: () {
+          setState(() => _isScaleInteracting = false);
+        },
       );
     }
 

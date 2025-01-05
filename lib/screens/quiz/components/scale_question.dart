@@ -5,14 +5,12 @@ class ScaleQuestion extends StatefulWidget {
   final Map<int, String> labels;
   final int value;
   final ValueChanged<int> onChanged;
-  final AnimationController? backgroundController;
 
   const ScaleQuestion({
     super.key,
     required this.labels,
     required this.value,
     required this.onChanged,
-    this.backgroundController,
   });
 
   @override
@@ -30,39 +28,25 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     return widget.labels[4] ?? '';
   }
 
-  void _updateSliderPosition() {
+  void _calculateSliderPosition() {
     final RenderBox? renderBox = _sliderKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final sliderWidth = renderBox.size.width - 16; // Account for thumb radius
-      final position = (widget.value - 1) / 6; // Normalize to 0-1
-      final xPosition = (sliderWidth * position) + 8; // Add back thumb radius
-      
-      setState(() {
-        _sliderPosition = Offset(xPosition, renderBox.size.height / 2);
-      });
-    }
+    if (renderBox == null) return;
+
+    final sliderWidth = renderBox.size.width;
+    final normalizedValue = (widget.value - 1) / 6; // Convert to 0-1 range
+    final xPos = 16 + (sliderWidth - 32) * normalizedValue; // Account for padding
+
+    setState(() {
+      _sliderPosition = Offset(xPos, renderBox.size.height / 2);
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    // Pause background animation
-    widget.backgroundController?.stop();
-  }
-
-  @override
-  void dispose() {
-    // Resume background animation
-    widget.backgroundController?.repeat();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(ScaleQuestion oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      _updateSliderPosition();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateSliderPosition();
+    });
   }
 
   @override
@@ -76,6 +60,7 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Current value label with animation
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: Text(
@@ -88,57 +73,62 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
           ),
         ),
         const SizedBox(height: 32),
+        // Slider with trail effect
         LayoutBuilder(
           builder: (context, constraints) {
-            return SliderTrail(
-              isDragging: _isDragging,
-              position: _sliderPosition,
-              child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: Colors.white.withOpacity(0.9),
-                  inactiveTrackColor: Colors.white.withOpacity(0.2),
-                  thumbColor: Colors.white,
-                  overlayColor: Colors.white.withOpacity(0.12),
-                  valueIndicatorColor: Colors.white.withOpacity(0.9),
-                  valueIndicatorTextStyle: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    fontFamily: 'Quicksand',
+            return Container(
+              key: _sliderKey,
+              width: constraints.maxWidth,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SliderTrail(
+                isDragging: _isDragging,
+                position: _sliderPosition,
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: Colors.white.withOpacity(0.9),
+                    inactiveTrackColor: Colors.white.withOpacity(0.2),
+                    thumbColor: Colors.white,
+                    overlayColor: Colors.white.withOpacity(0.12),
+                    valueIndicatorColor: Colors.white.withOpacity(0.9),
+                    valueIndicatorTextStyle: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      fontFamily: 'Quicksand',
+                    ),
+                    trackHeight: 4.0,
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 8.0,
+                      elevation: 4.0,
+                    ),
+                    tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
+                    activeTickMarkColor: Colors.white.withOpacity(0.9),
+                    inactiveTickMarkColor: Colors.white.withOpacity(0.4),
                   ),
-                  trackHeight: 4.0,
-                  thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 8.0,
-                    elevation: 4.0,
+                  child: Slider(
+                    min: 1,
+                    max: 7,
+                    divisions: 6,
+                    value: widget.value.toDouble(),
+                    label: widget.value.toString(),
+                    onChangeStart: (value) {
+                      setState(() => _isDragging = true);
+                    },
+                    onChanged: (newValue) {
+                      widget.onChanged(newValue.round());
+                      _calculateSliderPosition();
+                    },
+                    onChangeEnd: (value) {
+                      setState(() => _isDragging = false);
+                    },
                   ),
-                  tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
-                  activeTickMarkColor: Colors.white.withOpacity(0.9),
-                  inactiveTickMarkColor: Colors.white.withOpacity(0.4),
-                ),
-                child: Slider(
-                  key: _sliderKey,
-                  min: 1,
-                  max: 7,
-                  divisions: 6,
-                  value: widget.value.toDouble(),
-                  label: widget.value.toString(),
-                  onChangeStart: (value) {
-                    setState(() => _isDragging = true);
-                    _updateSliderPosition();
-                  },
-                  onChanged: (newValue) {
-                    widget.onChanged(newValue.round());
-                    _updateSliderPosition();
-                  },
-                  onChangeEnd: (value) {
-                    setState(() => _isDragging = false);
-                  },
                 ),
               ),
             );
           },
         ),
         const SizedBox(height: 24),
+        // Min and max labels
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

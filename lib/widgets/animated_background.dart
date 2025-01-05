@@ -4,11 +4,13 @@ import 'dart:math' as math;
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
   final List<Color> colors;
+  final bool isEnabled;
   
   const AnimatedBackground({
     Key? key,
     required this.child,
     required this.colors,
+    this.isEnabled = true,
   }) : super(key: key);
 
   @override
@@ -18,14 +20,14 @@ class AnimatedBackground extends StatefulWidget {
 class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProviderStateMixin {
   late final AnimationController _controller;
   final List<BackgroundShape> _shapes = [];
-  static const int numberOfShapes = 15;
+  static const int numberOfShapes = 25; // More shapes
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 15), // Slower animation
     )..repeat();
 
     _initializeShapes();
@@ -37,14 +39,26 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
       _shapes.add(
         BackgroundShape(
           position: Offset(
-            random.nextDouble() * 300,
-            300 + random.nextDouble() * 300, // Start from middle of screen
+            random.nextDouble() * 400,
+            400 + random.nextDouble() * 400,
           ),
-          size: 2 + random.nextDouble() * 5, // Much smaller particles
-          speed: 0.3 + random.nextDouble() * 0.5, // Slower movement
+          size: 1.5 + random.nextDouble() * 2.5, // Much smaller (1.5-4px)
+          speed: 0.2 + random.nextDouble() * 0.3, // Even slower movement
           angle: random.nextDouble() * 2 * math.pi,
         ),
       );
+    }
+  }
+
+  @override
+  void didUpdateWidget(AnimatedBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isEnabled != oldWidget.isEnabled) {
+      if (widget.isEnabled) {
+        _controller.repeat();
+      } else {
+        _controller.stop();
+      }
     }
   }
 
@@ -67,26 +81,18 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> with TickerProv
       child: Stack(
         fit: StackFit.expand,
         children: [
-          RepaintBoundary(
-            child: CustomPaint(
-              painter: BackgroundPainter(
-                shapes: _shapes,
-                animation: _controller,
+          if (widget.isEnabled) ...[
+            RepaintBoundary(
+              child: CustomPaint(
+                painter: BackgroundPainter(
+                  shapes: _shapes,
+                  animation: _controller,
+                ),
+                isComplex: true,
+                willChange: true,
               ),
-              isComplex: true,
-              willChange: true,
             ),
-          ),
-          IgnorePointer(
-            child: CustomPaint(
-              painter: BackgroundPainter(
-                shapes: _shapes,
-                animation: _controller,
-              ),
-              isComplex: true,
-              willChange: true,
-            ),
-          ),
+          ],
           widget.child,
         ],
       ),
@@ -120,13 +126,13 @@ class BackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withAlpha(10) // More transparent
+      ..color = Colors.white.withOpacity(0.04) // More transparent
       ..style = PaintingStyle.fill;
 
     for (var shape in shapes) {
       final movement = Offset(
         math.cos(shape.angle) * shape.speed * animation.value,
-        math.sin(shape.angle) * shape.speed * animation.value - 0.3,
+        math.sin(shape.angle) * shape.speed * animation.value - 0.2,
       );
       
       shape.position += movement;

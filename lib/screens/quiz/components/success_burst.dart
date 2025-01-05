@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class SuccessBurst extends StatefulWidget {
@@ -20,13 +20,13 @@ class SuccessBurst extends StatefulWidget {
 class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final List<BurstParticle> _particles = [];
-  final Random _random = Random();
-  
+  final math.Random _random = math.Random();
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 800), // Longer animation
+      duration: const Duration(milliseconds: 1200), // Longer animation
       vsync: this,
     );
 
@@ -38,24 +38,27 @@ class _SuccessBurstState extends State<SuccessBurst> with SingleTickerProviderSt
   void _createParticles(Offset center) {
     _particles.clear();
     
-    // Create more, smaller particles
-    for (int i = 0; i < 30; i++) { // Increased from 12 to 30
-      // Calculate angle spread (only upward fountain)
-      double angle = -pi/2 + (pi/3 * _random.nextDouble() - pi/6); // -60° to -120°
+    // Create many more smaller particles
+    for (int i = 0; i < 50; i++) { // Increased from 30 to 50
+      // Calculate a fountain-like spread angle (-100° to -80° from horizontal)
+      double angle = -math.pi * (0.44 + _random.nextDouble() * 0.12);
       
-      // Vary speeds more for fountain effect
-      double speed = 1 + _random.nextDouble() * 2;
+      // Vary the initial velocities
+      double speed = 1 + _random.nextDouble() * 3;
       
-      // Add gravity effect
+      // Create particle with gravity and drag effects
       _particles.add(BurstParticle(
         position: center,
         velocity: Offset(
-          cos(angle) * speed,
-          sin(angle) * speed,
+          math.cos(angle) * speed,
+          math.sin(angle) * speed,
         ),
-        acceleration: const Offset(0, 0.1), // Gravity
-        size: 1 + _random.nextDouble() * 2, // Smaller particles (1-3px)
-        color: Colors.white.withOpacity(0.1 + _random.nextDouble() * 0.2), // More transparent
+        // Add gravity and air resistance
+        acceleration: const Offset(0, 0.15), // Increased gravity
+        drag: 0.97 + _random.nextDouble() * 0.02, // Air resistance
+        size: 0.8 + _random.nextDouble() * 1.2, // Smaller particles (0.8-2px)
+        color: Colors.white.withOpacity(0.04 + _random.nextDouble() * 0.08), // More transparent
+        rotationSpeed: (_random.nextDouble() - 0.5) * 0.2, // Slight rotation
       ));
     }
   }
@@ -100,20 +103,34 @@ class BurstParticle {
   Offset position;
   Offset velocity;
   final Offset acceleration;
+  final double drag;
   final double size;
   final Color color;
+  final double rotationSpeed;
+  double rotation = 0;
 
   BurstParticle({
     required this.position,
     required this.velocity,
     required this.acceleration,
+    required this.drag,
     required this.size,
     required this.color,
+    required this.rotationSpeed,
   });
 
   void update(double progress) {
-    velocity += acceleration; // Apply gravity
+    // Apply gravity
+    velocity += acceleration;
+    
+    // Apply drag (air resistance)
+    velocity = velocity.scale(drag, drag);
+    
+    // Update position
     position += velocity;
+    
+    // Update rotation
+    rotation += rotationSpeed;
   }
 }
 
@@ -132,11 +149,16 @@ class BurstPainter extends CustomPainter {
       particle.update(progress);
       
       final paint = Paint()
-        ..color = particle.color.withOpacity(1 - progress)
+        ..color = particle.color.withOpacity((1 - progress) * 0.8) // Fade out
         ..style = PaintingStyle.fill
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5); // Slight glow
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8); // Soft glow
 
-      canvas.drawCircle(particle.position, particle.size, paint);
+      // Draw with slight rotation for more organic feel
+      canvas.save();
+      canvas.translate(particle.position.dx, particle.position.dy);
+      canvas.rotate(particle.rotation);
+      canvas.drawCircle(Offset.zero, particle.size, paint);
+      canvas.restore();
     }
   }
 

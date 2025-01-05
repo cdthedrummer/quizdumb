@@ -59,21 +59,24 @@ class _SliderTrailState extends State<SliderTrail> with SingleTickerProviderStat
     if (!mounted) return;
     
     setState(() {
-      final numParticles = 2 + _random.nextInt(2); // Reduced number for better performance
+      final numParticles = 4 + _random.nextInt(3); // More particles
       final movingRight = _lastPosition == null || widget.position.dx > _lastPosition!.dx;
       
       for (int i = 0; i < numParticles; i++) {
-        final angle = ((_random.nextDouble() - 0.5) * math.pi / 3) + // Reduced spread
-            (movingRight ? math.pi : 0);
+        // Spray particles in an arc behind the movement
+        final baseAngle = movingRight ? math.pi : 0;
+        final angleSpread = math.pi / 3; // 60-degree arc
+        final angle = baseAngle + ((_random.nextDouble() - 0.5) * angleSpread);
         
         _particles.add(TrailParticle(
           position: widget.position,
           velocity: Offset(
-            math.cos(angle) * (0.5 + _random.nextDouble() * 0.5), // Reduced velocity
-            math.sin(angle) * (0.5 + _random.nextDouble() * 0.5),
+            math.cos(angle) * (2 + _random.nextDouble() * 1), // Faster particles
+            math.sin(angle) * (1 + _random.nextDouble() * 0.5),
           ),
-          size: 2 + _random.nextDouble(), // Slightly larger particles
-          maxAge: 0.3 + _random.nextDouble() * 0.2, // Longer lifetime
+          size: 2.5 + _random.nextDouble() * 1.5, // Larger particles
+          maxAge: 0.4 + _random.nextDouble() * 0.2, // Longer lifetime
+          color: Colors.white.withOpacity(0.8 + _random.nextDouble() * 0.2), // Varying opacity
         ));
       }
 
@@ -118,6 +121,7 @@ class TrailParticle {
   final Offset velocity;
   final double size;
   final double maxAge;
+  final Color color;
   double age = 0;
 
   TrailParticle({
@@ -125,6 +129,7 @@ class TrailParticle {
     required this.velocity,
     required this.size,
     required this.maxAge,
+    required this.color,
   });
 
   void update() {
@@ -147,8 +152,9 @@ class TrailPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final particle in particles) {
       final paint = Paint()
-        ..color = Colors.white.withOpacity(particle.opacity * 0.4) // Increased base opacity
-        ..style = PaintingStyle.fill;
+        ..color = particle.color.withOpacity(particle.opacity)
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5); // Slight glow effect
 
       canvas.drawCircle(particle.position, particle.size, paint);
     }

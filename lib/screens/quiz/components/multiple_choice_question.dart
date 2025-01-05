@@ -4,7 +4,7 @@ class MultipleChoiceQuestion extends StatelessWidget {
   final List<String> options;
   final List<String> selectedAnswers;
   final bool isMultiSelect;
-  final Function(List<String>) onAnswerSelected;
+  final void Function(List<String>, Offset?) onAnswerSelected;
 
   const MultipleChoiceQuestion({
     super.key,
@@ -54,7 +54,7 @@ class MultipleChoiceQuestion extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
+          onTapDown: (details) {
             if (isMultiSelect) {
               final newSelection = List<String>.from(selectedAnswers);
               if (selectedAnswers.contains(option)) {
@@ -62,9 +62,9 @@ class MultipleChoiceQuestion extends StatelessWidget {
               } else {
                 newSelection.add(option);
               }
-              onAnswerSelected(newSelection);
+              onAnswerSelected(newSelection, details.globalPosition);
             } else {
-              onAnswerSelected([option]);
+              onAnswerSelected([option], details.globalPosition);
             }
           },
           borderRadius: BorderRadius.circular(12.0),

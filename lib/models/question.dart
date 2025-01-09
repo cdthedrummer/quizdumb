@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'category.dart';
-
 enum QuestionType {
   single,
   multiple,
@@ -14,10 +11,10 @@ class Question {
   final String text;
   final QuestionType type;
   final List<String>? options;
-  final List<String>? imageOptions;
+  final Map<String, Map<String, int>>? attributes;  // Keep for backward compatibility
+  final Map<Category, double>? categoryWeights;     // New scoring system
+  final Map<String, int>? scaleAttributes;         // Keep for backward compatibility
   final Map<int, String>? scaleLabels;
-  final List<Category> categories;
-  final Map<Category, double> categoryWeights;
   final String? encouragingMessage;
   final bool isCheckpoint;
 
@@ -26,10 +23,10 @@ class Question {
     required this.text,
     required this.type,
     this.options,
-    this.imageOptions,
+    this.attributes,
+    this.categoryWeights,
+    this.scaleAttributes,
     this.scaleLabels,
-    this.categories = const [],
-    this.categoryWeights = const {},
     this.encouragingMessage,
     this.isCheckpoint = false,
   });

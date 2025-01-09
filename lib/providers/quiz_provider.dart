@@ -1,71 +1,35 @@
 import 'package:flutter/foundation.dart';
 import '../models/question.dart';
-import '../models/result.dart';
+import '../models/category.dart';
 import '../data/questions.dart';
 
+enum QuizStatus {
+  notStarted,
+  inProgress,
+  complete,
+}
+
 class QuizProvider with ChangeNotifier {
-  QuizStatus _status = QuizStatus.initial;
-  int _currentQuestionIndex = 0;
-  final List<Question> _questions = quizQuestions;
-  final Map<int, List<String>> _answers = {};
-  final Map<String, int> _scores = {
-    'Strength': 0,
-    'Intelligence': 0,
-    'Wisdom': 0,
-    'Dexterity': 0,
-    'Charisma': 0,
-    'Constitution': 0,
-  };
+  int _currentIndex = 0;
+  final Map<String, List<String>> _answers = {};
+  QuizStatus _status = QuizStatus.notStarted;
+  final List<Question> _questions = questions;
 
-  // Getters
   QuizStatus get status => _status;
-  int get currentQuestionIndex => _currentQuestionIndex;
-  List<Question> get questions => List.unmodifiable(_questions);
-  Question get currentQuestion => _questions[_currentQuestionIndex];
-  Map<String, int> get scores => Map.unmodifiable(_scores);
-  bool get isLastQuestion => _currentQuestionIndex >= _questions.length - 1;
-  double get progress => (_currentQuestionIndex + 1) / _questions.length;
+  int get currentQuestionIndex => _currentIndex;
+  Question get currentQuestion => _questions[_currentIndex];
+  double get progress => _currentIndex / (_questions.length - 1);
 
-  // Answer Management
-  void answerQuestion(int questionId, dynamic answer) {
-    final question = _questions.firstWhere((q) => q.id == questionId);
-    List<String> answerList;
-
-    if (answer is int) {
-      answerList = [answer.toString()];
-      _handleScaleAnswer(question, answer);
-    } else if (answer is List<String>) {
-      answerList = answer;
-      _handleChoiceAnswer(question, answer);
-    } else {
-      answerList = [answer.toString()];
-    }
-
-    _answers[questionId] = answerList;
+  void startQuiz() {
+    _status = QuizStatus.inProgress;
+    _currentIndex = 0;
+    _answers.clear();
     notifyListeners();
   }
 
-  List<String>? getAnswerForQuestion(int questionId) => _answers[questionId];
-
-  void _handleScaleAnswer(Question question, int value) {
-    question.scaleAttributes?.forEach((attribute, weight) {
-      _scores[attribute] = (_scores[attribute] ?? 0) + (weight * value ~/ 7);
-    });
-  }
-
-  void _handleChoiceAnswer(Question question, List<String> selectedOptions) {
-    for (final option in selectedOptions) {
-      final attributes = question.attributes?[option] ?? {};
-      for (final entry in attributes.entries) {
-        _scores[entry.key] = (_scores[entry.key] ?? 0) + entry.value;
-      }
-    }
-  }
-
-  // Navigation
   void nextQuestion() {
-    if (!isLastQuestion) {
-      _currentQuestionIndex++;
+    if (_currentIndex < _questions.length - 1) {
+      _currentIndex++;
       notifyListeners();
     } else {
       _status = QuizStatus.complete;
@@ -74,55 +38,94 @@ class QuizProvider with ChangeNotifier {
   }
 
   void previousQuestion() {
-    if (_currentQuestionIndex > 0) {
-      _currentQuestionIndex--;
+    if (_currentIndex > 0) {
+      _currentIndex--;
       notifyListeners();
     }
   }
 
-  // Quiz State Management
-  void startQuiz() {
-    _status = QuizStatus.inProgress;
-    _currentQuestionIndex = 0;
-    _answers.clear();
-    _resetScores();
+  List<String>? getAnswerForQuestion(String questionId) {
+    return _answers[questionId];
+  }
+
+  void answerQuestion(String questionId, List<String> answer) {
+    _answers[questionId] = answer;
     notifyListeners();
   }
 
-  void resetQuiz() {
-    _status = QuizStatus.initial;
-    _currentQuestionIndex = 0;
-    _answers.clear();
-    _resetScores();
-    notifyListeners();
+  Map<Category, double> calculateCategoryScores() {
+    final scores = <Category, double>{};
+    for (final category in Category.values) {
+      scores[category] = 0.0;
+    }
+
+    int totalQuestions = 0;
+    for (final question in _questions) {
+      final answer = _answers[question.id];
+      if (answer == null) continue;
+
+      // Handle new scoring system
+      if (question.categoryWeights != null) {
+        question.categoryWeights!.forEach((category, weight) {
+          if (question.isScale) {
+            final value = double.tryParse(answer.first) ?? 0.0;
+            scores[category] = (scores[category] ?? 0.0) + (value / 5.0) * weight;
+          } else {
+            scores[category] = (scores[category] ?? 0.0) + weight;
+          }
+        });
+      }
+      // Handle legacy scoring system
+      else if (question.scaleAttributes != null && question.isScale) {
+        final value = int.tryParse(answer.first) ?? 0;
+        question.scaleAttributes!.forEach((attr, weight) {
+          // Convert legacy attributes to categories
+          final category = _mapAttributeToCategory(attr);
+          if (category != null) {
+            scores[category] = (scores[category] ?? 0.0) + (value / 5.0) * weight;
+          }
+        });
+      }
+      else if (question.attributes != null) {
+        for (final ans in answer) {
+          final attrs = question.attributes![ans];
+          if (attrs != null) {
+            attrs.forEach((attr, value) {
+              final category = _mapAttributeToCategory(attr);
+              if (category != null) {
+                scores[category] = (scores[category] ?? 0.0) + value;
+              }
+            });
+          }
+        }
+      }
+      totalQuestions++;
+    }
+
+    // Normalize scores to 0-1 range
+    if (totalQuestions > 0) {
+      scores.forEach((category, score) {
+        scores[category] = (score / (totalQuestions * 5)).clamp(0.0, 1.0);
+      });
+    }
+
+    return scores;
   }
 
-  void _resetScores() {
-    _scores.updateAll((key, value) => 0);
-  }
-
-  // Results Calculation
-  String? getPrimaryAttribute() {
-    if (_scores.isEmpty) return null;
-    return _scores.entries
-        .reduce((max, entry) => entry.value > max.value ? entry : max)
-        .key;
-  }
-
-  Map<String, int> getAttributeRankings() {
-    var sortedEntries = _scores.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    return Map.fromEntries(sortedEntries);
-  }
-
-  QuizResult getResults() {
-    return QuizResult(
-      scores: Map.from(_scores),
-      primaryAttribute: getPrimaryAttribute() ?? '',
-      totalQuestions: _questions.length,
-      answeredQuestions: _answers.length,
-    );
+  Category? _mapAttributeToCategory(String attribute) {
+    // Map legacy attributes to new categories
+    switch (attribute.toLowerCase()) {
+      case 'strength':
+      case 'dexterity':
+      case 'constitution':
+        return Category.physical;
+      case 'intelligence':
+      case 'wisdom':
+        return Category.mental;
+      case 'charisma':
+        return Category.social;
+      default:
+        return null;
+    }
   }
 }
-
-enum QuizStatus { initial, inProgress, complete }

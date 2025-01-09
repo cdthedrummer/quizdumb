@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum Category {
   physical,
   mental,
@@ -40,7 +42,7 @@ enum Category {
     }
   }
 
-  Color get color {
+  Color get themeColor {
     switch (this) {
       case Category.physical:
         return const Color(0xFF64B5F6);

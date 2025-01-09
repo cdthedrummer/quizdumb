@@ -1,12 +1,12 @@
-import 'category.dart';
-
 enum QuestionType {
   single,
   multiple,
   scale,
   imageChoice,
-  priorityRanking;
+  priorityRanking
+}
 
+extension QuestionTypeExtension on QuestionType {
   bool get isScale => this == QuestionType.scale;
   bool get isSingleChoice => this == QuestionType.single;
   bool get isMultipleChoice => this == QuestionType.multiple;
@@ -19,8 +19,8 @@ class Question {
   final String text;
   final QuestionType type;
   final List<String>? options;
-  final Map<String, Map<String, int>>? attributes;  // Legacy attribute system
-  final Map<String, int>? scaleAttributes;         // Legacy scale system
+  final Map<String, Map<String, int>>? attributes;
+  final Map<String, int>? scaleAttributes;
   final Map<int, String>? scaleLabels;
   final String? encouragingMessage;
   final bool isCheckpoint;
@@ -36,4 +36,11 @@ class Question {
     this.encouragingMessage,
     this.isCheckpoint = false,
   });
+
+  // Forward the type extension getters
+  bool get isScale => type.isScale;
+  bool get isSingleChoice => type.isSingleChoice;
+  bool get isMultipleChoice => type.isMultipleChoice;
+  bool get isImageChoice => type.isImageChoice;
+  bool get isPriorityRanking => type.isPriorityRanking;
 }

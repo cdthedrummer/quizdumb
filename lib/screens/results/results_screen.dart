@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/character_class.dart';
 import '../../providers/quiz_provider.dart';
 import '../../data/character_classes.dart';
 import '../welcome_screen.dart';
@@ -8,49 +9,12 @@ import '../quiz/components/stat_radar_chart.dart';
 class ResultsScreen extends StatelessWidget {
   const ResultsScreen({super.key});
 
-  CharacterClass _determineCharacterClass(Map<String, double> scores) {
-    var bestMatch = characterClasses[0];
-    var highestMatch = 0.0;
-
-    for (final characterClass in characterClasses) {
-      var matchScore = 0.0;
-      var totalWeights = 0.0;
-
-      characterClass.attributeWeights.forEach((attr, weight) {
-        matchScore += (scores[attr] ?? 0.0) * weight;
-        totalWeights += weight;
-      });
-
-      final normalizedMatch = matchScore / totalWeights;
-      if (normalizedMatch > highestMatch) {
-        highestMatch = normalizedMatch;
-        bestMatch = characterClass;
-      }
-    }
-
-    return bestMatch;
-  }
-
-  List<String> _getTopAttributes(Map<String, double> scores) {
-    final sortedAttrs = scores.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    return sortedAttrs.take(3).map((e) => e.key).toList();
-  }
-
-  List<String> _getImprovementAreas(Map<String, double> scores) {
-    final sortedAttrs = scores.entries.toList()
-      ..sort((a, b) => a.value.compareTo(b.value));
-    return sortedAttrs.take(2).map((e) => e.key).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<QuizProvider>(
       builder: (context, quizProvider, _) {
         final scores = quizProvider.scores;
         final characterClass = _determineCharacterClass(scores);
-        final topAttributes = _getTopAttributes(scores);
-        final improvementAreas = _getImprovementAreas(scores);
 
         return Scaffold(
           body: Container(
@@ -71,9 +35,9 @@ class ResultsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
+                      const Text(
                         'Your Adventure Class',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -91,14 +55,14 @@ class ResultsScreen extends StatelessWidget {
                       const SizedBox(height: 32),
                       _buildAttributeSection(
                         'Your Strengths',
-                        topAttributes,
+                        _getTopAttributes(scores),
                         Icons.star,
                         Colors.amber,
                       ),
                       const SizedBox(height: 24),
                       _buildAttributeSection(
                         'Areas to Level Up',
-                        improvementAreas,
+                        _getImprovementAreas(scores),
                         Icons.trending_up,
                         Colors.greenAccent,
                       ),
@@ -142,6 +106,41 @@ class ResultsScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  CharacterClass _determineCharacterClass(Map<String, double> scores) {
+    var bestMatch = characterClasses[0];
+    var highestMatch = 0.0;
+
+    for (final characterClass in characterClasses) {
+      var matchScore = 0.0;
+      var totalWeight = 0.0;
+
+      characterClass.attributeWeights.forEach((attr, weight) {
+        matchScore += (scores[attr] ?? 0.0) * weight;
+        totalWeight += weight;
+      });
+
+      final normalizedMatch = matchScore / totalWeight;
+      if (normalizedMatch > highestMatch) {
+        highestMatch = normalizedMatch;
+        bestMatch = characterClass;
+      }
+    }
+
+    return bestMatch;
+  }
+
+  List<String> _getTopAttributes(Map<String, double> scores) {
+    final sortedAttrs = scores.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return sortedAttrs.take(3).map((e) => e.key).toList();
+  }
+
+  List<String> _getImprovementAreas(Map<String, double> scores) {
+    final sortedAttrs = scores.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
+    return sortedAttrs.take(2).map((e) => e.key).toList();
   }
 
   Widget _buildCharacterSection(CharacterClass characterClass) {
@@ -212,19 +211,17 @@ class ResultsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: attributes.map((attr) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    '• $attr',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontFamily: 'Quicksand',
-                    ),
+              children: attributes.map((attr) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  '• $attr',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontFamily: 'Quicksand',
                   ),
-                );
-              }).toList(),
+                ),
+              )).toList(),
             ),
           ),
         ),

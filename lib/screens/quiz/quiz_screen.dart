@@ -8,7 +8,6 @@ import 'components/multiple_choice_question.dart';
 import 'components/scale_question.dart';
 import 'components/navigation_buttons.dart';
 import 'components/progress_bar.dart';
-import 'components/question_card_base.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -65,7 +64,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withAlpha(204),  // 0.8 opacity
                   Theme.of(context).primaryColor,
                 ],
               ),
@@ -81,13 +80,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     Expanded(
                       child: FadeTransition(
                         opacity: _fadeAnimation,
-                        child: QuestionCardBase(
-                          question: question,
-                          child: _buildQuestionContent(
-                            question,
-                            quizProvider,
-                          ),
-                        ),
+                        child: _buildQuestionContent(question),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -108,16 +101,21 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildQuestionContent(Question question, QuizProvider provider) {
+  Widget _buildQuestionContent(Question question) {
+    final provider = Provider.of<QuizProvider>(context, listen: false);
+    final currentAnswer = provider.getAnswerForQuestion(question.id);
+    
     if (question.isScale) {
+      final scaleValue = currentAnswer?.isNotEmpty == true 
+          ? int.tryParse(currentAnswer!.first) ?? 4 
+          : 4;
+          
       return ScaleQuestion(
         labels: question.scaleLabels!,
-        value: provider.getAnswerForQuestion(question.id)?.first != null
-            ? int.parse(provider.getAnswerForQuestion(question.id)!.first)
-            : 4,
+        value: scaleValue,
         onChanged: (value) {
           setState(() => _isInteracting = true);
-          _handleAnswerSelection(question, [value.toString()], null);
+          provider.answerQuestion(question.id, [value.toString()]);
         },
         onInteractionEnd: () {
           setState(() => _isInteracting = false);
@@ -128,23 +126,19 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     return MultipleChoiceQuestion(
       options: question.options!,
       isMultiSelect: question.isMultipleChoice,
-      selectedAnswers: provider.getAnswerForQuestion(question.id) ?? [],
-      onAnswerSelected: (answers, position) => 
-          _handleAnswerSelection(question, answers, position),
-    );
-  }
-
-  void _handleAnswerSelection(Question question, List<String> answers, Offset? position) {
-    final provider = Provider.of<QuizProvider>(context, listen: false);
-    provider.answerQuestion(question.id, answers);
-
-    if (!question.isScale && !question.isMultipleChoice) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          provider.nextQuestion();
+      selectedAnswers: currentAnswer ?? [],
+      onAnswerSelected: (answers, position) {
+        provider.answerQuestion(question.id, answers);
+        
+        if (!question.isMultipleChoice) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              provider.nextQuestion();
+            }
+          });
         }
-      });
-    }
+      },
+    );
   }
 
   bool _canMoveNext(QuizProvider provider) {

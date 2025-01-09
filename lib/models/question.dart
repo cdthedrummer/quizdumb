@@ -2,28 +2,22 @@ import 'package:flutter/material.dart';
 import 'category.dart';
 
 enum QuestionType {
-  singleChoice,
-  multipleChoice,
+  single,
+  multiple,
   scale,
   imageChoice,
-  priorityRanking;
-
-  bool get isSingleChoice => this == QuestionType.singleChoice;
-  bool get isMultipleChoice => this == QuestionType.multipleChoice;
-  bool get isScale => this == QuestionType.scale;
-  bool get isImageChoice => this == QuestionType.imageChoice;
-  bool get isPriorityRanking => this == QuestionType.priorityRanking;
+  priorityRanking
 }
 
 class Question {
   final String id;
   final String text;
   final QuestionType type;
-  final List<Category> categories;
-  final Map<String, double> categoryWeights;
   final List<String>? options;
   final List<String>? imageOptions;
   final Map<int, String>? scaleLabels;
+  final List<Category> categories;
+  final Map<Category, double> categoryWeights;
   final String? encouragingMessage;
   final bool isCheckpoint;
 
@@ -31,18 +25,18 @@ class Question {
     required this.id,
     required this.text,
     required this.type,
-    required this.categories,
-    required this.categoryWeights,
     this.options,
     this.imageOptions,
     this.scaleLabels,
+    this.categories = const [],
+    this.categoryWeights = const {},
     this.encouragingMessage,
     this.isCheckpoint = false,
   });
 
-  bool get requiresImages => type == QuestionType.imageChoice;
-  bool get requiresOptions => type == QuestionType.singleChoice || 
-                            type == QuestionType.multipleChoice || 
-                            type == QuestionType.priorityRanking;
-  bool get requiresScaleLabels => type == QuestionType.scale;
+  bool get isScale => type == QuestionType.scale;
+  bool get isSingleChoice => type == QuestionType.single;
+  bool get isMultipleChoice => type == QuestionType.multiple;
+  bool get isImageChoice => type == QuestionType.imageChoice;
+  bool get isPriorityRanking => type == QuestionType.priorityRanking;
 }

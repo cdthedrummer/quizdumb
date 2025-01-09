@@ -5,41 +5,45 @@ class ClassHeader extends StatelessWidget {
   final CharacterClass characterClass;
 
   const ClassHeader({
-    Key? key,
+    super.key,
     required this.characterClass,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          characterClass.emoji,
-          style: const TextStyle(fontSize: 48),
-          textAlign: TextAlign.center,
+    return Card(
+      color: Colors.white.withAlpha(51),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              characterClass.emoji,
+              style: const TextStyle(fontSize: 64),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              characterClass.name,  // Changed from title to name
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Quicksand',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              characterClass.description,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontFamily: 'Quicksand',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          characterClass.name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Quicksand',
-          ),
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          characterClass.title,
-          style: TextStyle(
-            color: Colors.white.withAlpha(230),
-            fontSize: 18,
-            fontStyle: FontStyle.italic,
-            fontFamily: 'Quicksand',
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+      ),
     );
   }
 }

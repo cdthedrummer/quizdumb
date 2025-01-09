@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../models/category.dart';
 
 class CheckpointScreen extends StatelessWidget {
-  final Map<Category, double> scores;
+  final Map<String, double> scores;
   final String encouragingMessage;
   final VoidCallback onContinue;
 
@@ -21,7 +20,7 @@ class CheckpointScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withAlpha(204), // 0.8 opacity
             Theme.of(context).primaryColor,
           ],
         ),
@@ -33,14 +32,14 @@ class CheckpointScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                Icons.celebration,
+                Icons.emoji_events,
                 size: 64,
                 color: Colors.white,
               ),
               const SizedBox(height: 24),
-              Text(
+              const Text(
                 'Progress Checkpoint!',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -98,20 +97,21 @@ class CheckpointScreen extends StatelessWidget {
       crossAxisSpacing: 16,
       childAspectRatio: 1.5,
       children: scores.entries.map((entry) {
+        final emoji = _getEmojiForAttribute(entry.key);
         return Card(
-          color: entry.key.color.withOpacity(0.9),
+          color: _getColorForAttribute(entry.key).withAlpha(230), // 0.9 opacity
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  entry.key.emoji,
+                  emoji,
                   style: const TextStyle(fontSize: 24),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  entry.key.displayName,
+                  entry.key,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -133,5 +133,43 @@ class CheckpointScreen extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+
+  String _getEmojiForAttribute(String attribute) {
+    switch (attribute) {
+      case 'Strength':
+        return '💪';
+      case 'Dexterity':
+        return '🎯';
+      case 'Constitution':
+        return '🛡️';
+      case 'Intelligence':
+        return '🧠';
+      case 'Wisdom':
+        return '🔮';
+      case 'Charisma':
+        return '✨';
+      default:
+        return '🌟';
+    }
+  }
+
+  Color _getColorForAttribute(String attribute) {
+    switch (attribute) {
+      case 'Strength':
+        return Colors.red;
+      case 'Dexterity':
+        return Colors.green;
+      case 'Constitution':
+        return Colors.orange;
+      case 'Intelligence':
+        return Colors.blue;
+      case 'Wisdom':
+        return Colors.purple;
+      case 'Charisma':
+        return Colors.pink;
+      default:
+        return Colors.grey;
+    }
   }
 }

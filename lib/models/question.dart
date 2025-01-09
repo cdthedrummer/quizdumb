@@ -1,9 +1,17 @@
+import 'category.dart';
+
 enum QuestionType {
   single,
   multiple,
   scale,
   imageChoice,
-  priorityRanking
+  priorityRanking;
+
+  bool get isScale => this == QuestionType.scale;
+  bool get isSingleChoice => this == QuestionType.single;
+  bool get isMultipleChoice => this == QuestionType.multiple;
+  bool get isImageChoice => this == QuestionType.imageChoice;
+  bool get isPriorityRanking => this == QuestionType.priorityRanking;
 }
 
 class Question {
@@ -11,9 +19,8 @@ class Question {
   final String text;
   final QuestionType type;
   final List<String>? options;
-  final Map<String, Map<String, int>>? attributes;  // Keep for backward compatibility
-  final Map<Category, double>? categoryWeights;     // New scoring system
-  final Map<String, int>? scaleAttributes;         // Keep for backward compatibility
+  final Map<String, Map<String, int>>? attributes;  // Legacy attribute system
+  final Map<String, int>? scaleAttributes;         // Legacy scale system
   final Map<int, String>? scaleLabels;
   final String? encouragingMessage;
   final bool isCheckpoint;
@@ -24,16 +31,9 @@ class Question {
     required this.type,
     this.options,
     this.attributes,
-    this.categoryWeights,
     this.scaleAttributes,
     this.scaleLabels,
     this.encouragingMessage,
     this.isCheckpoint = false,
   });
-
-  bool get isScale => type == QuestionType.scale;
-  bool get isSingleChoice => type == QuestionType.single;
-  bool get isMultipleChoice => type == QuestionType.multiple;
-  bool get isImageChoice => type == QuestionType.imageChoice;
-  bool get isPriorityRanking => type == QuestionType.priorityRanking;
 }

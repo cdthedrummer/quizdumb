@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import '../models/question.dart';
-import '../models/category.dart';
 import '../data/questions.dart';
 
 enum QuizStatus {
@@ -19,9 +18,17 @@ class QuizProvider with ChangeNotifier {
   int get currentQuestionIndex => _currentIndex;
   Question get currentQuestion => _questions[_currentIndex];
   double get progress => _currentIndex / (_questions.length - 1);
+  Map<String, double> get scores => calculateScores();
 
   void startQuiz() {
     _status = QuizStatus.inProgress;
+    _currentIndex = 0;
+    _answers.clear();
+    notifyListeners();
+  }
+
+  void resetQuiz() {
+    _status = QuizStatus.notStarted;
     _currentIndex = 0;
     _answers.clear();
     notifyListeners();
@@ -55,50 +62,36 @@ class QuizProvider with ChangeNotifier {
 
   Map<String, double> calculateScores() {
     final scores = <String, double>{};
-    final attributeMaxValues = <String, double>{};
+    final totals = <String, int>{};
 
-    // First pass: calculate maximum possible values
-    for (final question in _questions) {
-      if (question.scaleAttributes != null) {
-        question.scaleAttributes!.forEach((attr, weight) {
-          attributeMaxValues[attr] = (attributeMaxValues[attr] ?? 0) + (weight * 7);
-        });
-      } else if (question.attributes != null) {
-        question.attributes!.values.forEach((attrs) {
-          attrs.forEach((attr, value) {
-            attributeMaxValues[attr] = (attributeMaxValues[attr] ?? 0) + value;
-          });
-        });
-      }
-    }
-
-    // Second pass: calculate actual scores
     for (final question in _questions) {
       final answer = _answers[question.id];
       if (answer == null) continue;
 
       if (question.isScale && question.scaleAttributes != null) {
         final value = int.tryParse(answer.first) ?? 4;
-        question.scaleAttributes!.forEach((attr, weight) {
-          scores[attr] = (scores[attr] ?? 0) + (value * weight);
-        });
+        for (final entry in question.scaleAttributes!.entries) {
+          scores[entry.key] = (scores[entry.key] ?? 0) + value * entry.value;
+          totals[entry.key] = (totals[entry.key] ?? 0) + 7 * entry.value;
+        }
       } else if (question.attributes != null) {
         for (final ans in answer) {
           final attrs = question.attributes![ans];
           if (attrs != null) {
             attrs.forEach((attr, value) {
               scores[attr] = (scores[attr] ?? 0) + value;
+              totals[attr] = (totals[attr] ?? 0) + value;
             });
           }
         }
       }
     }
 
-    // Normalize scores to 0-1 range
+    // Normalize scores
     final normalizedScores = <String, double>{};
-    scores.forEach((attr, score) {
-      final maxValue = attributeMaxValues[attr] ?? 1;
-      normalizedScores[attr] = (score / maxValue).clamp(0.0, 1.0);
+    scores.forEach((key, value) {
+      final total = totals[key] ?? 1;
+      normalizedScores[key] = (value / total).clamp(0.0, 1.0);
     });
 
     return normalizedScores;

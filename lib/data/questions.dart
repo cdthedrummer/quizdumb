@@ -1,11 +1,11 @@
 import '../models/question.dart';
 
-const quizQuestions = [
+const questions = [
   // Single Choice Questions (First 4)
   Question(
-    id: 1,
+    id: "q1",
     text: "Bad day. What helps? 🌟",
-    type: 'single',
+    type: QuestionType.single,
     options: [
       "Cook something new 🥘",
       "Play with pets 🐾",
@@ -22,9 +22,9 @@ const quizQuestions = [
     },
   ),
   Question(
-    id: 2,
+    id: "q2",
     text: "Your dream superpower? ✨",
-    type: 'single',
+    type: QuestionType.single,
     options: [
       "Time control ⌛",
       "Talk to animals 🦊",
@@ -39,9 +39,9 @@ const quizQuestions = [
     },
   ),
   Question(
-    id: 3,
+    id: "q3",
     text: "Pick a hobby you've never tried 🎯",
-    type: 'single',
+    type: QuestionType.single,
     options: [
       "Beekeeping 🐝",
       "Stand-up comedy 🎤",
@@ -60,9 +60,9 @@ const quizQuestions = [
     },
   ),
   Question(
-    id: 4,
+    id: "q4",
     text: "It's raining. You've got the day off. You... ☔",
-    type: 'single',
+    type: QuestionType.single,
     options: [
       "Build a blanket fort 🏰",
       "Bake cookies 🍪",
@@ -81,9 +81,9 @@ const quizQuestions = [
 
   // Scale Questions (Middle 4)
   Question(
-    id: 5,
+    id: "q5",
     text: "How do you handle change? 🔄",
-    type: 'scale',
+    type: QuestionType.scale,
     scaleAttributes: {
       'Wisdom': 2,
       'Constitution': 1,
@@ -95,9 +95,9 @@ const quizQuestions = [
     },
   ),
   Question(
-    id: 6,
+    id: "q6",
     text: "Do you collect things? 🗃️",
-    type: 'scale',
+    type: QuestionType.scale,
     scaleAttributes: {
       'Intelligence': 2,
       'Wisdom': 1,
@@ -108,10 +108,11 @@ const quizQuestions = [
       7: "Big collector",
     },
   ),
+
   Question(
-    id: 7,
+    id: "q7",
     text: "How's your green thumb? 🌱",
-    type: 'scale',
+    type: QuestionType.scale,
     scaleAttributes: {
       'Constitution': 2,
       'Wisdom': 1,
@@ -123,9 +124,9 @@ const quizQuestions = [
     },
   ),
   Question(
-    id: 8,
+    id: "q8",
     text: "Morning person? 🌅",
-    type: 'scale',
+    type: QuestionType.scale,
     scaleAttributes: {
       'Constitution': 2,
       'Strength': 1,
@@ -139,9 +140,9 @@ const quizQuestions = [
 
   // Multiple Choice Questions (Last 4)
   Question(
-    id: 9,
+    id: "q9",
     text: "Pick your perfect pets! 🐾",
-    type: 'multiple',
+    type: QuestionType.multiple,
     options: [
       "Dog 🐕",
       "Cat 🐱",
@@ -160,9 +161,9 @@ const quizQuestions = [
     },
   ),
   Question(
-    id: 10,
+    id: "q10",
     text: "What would you save in a fire? 🔥",
-    type: 'multiple',
+    type: QuestionType.multiple,
     options: [
       "Photo albums 📸",
       "Family heirlooms 👑",
@@ -177,47 +178,5 @@ const quizQuestions = [
       "Electronics 📱": {'Intelligence': 2},
       "Art supplies 🎨": {'Dexterity': 2},
     },
-  ),
-  Question(
-    id: 11,
-    text: "Your dream home must have... 🏠",
-    type: 'multiple',
-    options: [
-      "Big kitchen 🍳",
-      "Secret room 🔐",
-      "Garden 🌺",
-      "Home gym 💪",
-      "Art studio 🎨",
-      "Library 📚"
-    ],
-    attributes: {
-      "Big kitchen 🍳": {'Constitution': 1, 'Dexterity': 1},
-      "Secret room 🔐": {'Intelligence': 2},
-      "Garden 🌺": {'Wisdom': 1, 'Constitution': 1},
-      "Home gym 💪": {'Strength': 2},
-      "Art studio 🎨": {'Dexterity': 2},
-      "Library 📚": {'Intelligence': 1, 'Wisdom': 1},
-    },
-  ),
-  Question(
-    id: 12,
-    text: "Pick your fantasy job! 🌟",
-    type: 'multiple',
-    options: [
-      "Dragon trainer 🐲",
-      "Time traveler ⌛",
-      "Potion master 🧪",
-      "Monster hunter 🗡️",
-      "Cloud sculptor ☁️",
-      "Dream walker 💫"
-    ],
-    attributes: {
-      "Dragon trainer 🐲": {'Strength': 1, 'Charisma': 1},
-      "Time traveler ⌛": {'Intelligence': 2},
-      "Potion master 🧪": {'Intelligence': 1, 'Wisdom': 1},
-      "Monster hunter 🗡️": {'Strength': 1, 'Dexterity': 1},
-      "Cloud sculptor ☁️": {'Dexterity': 2},
-      "Dream walker 💫": {'Wisdom': 2},
-    },
-  ),
+  )
 ];

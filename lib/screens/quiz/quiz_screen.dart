@@ -51,55 +51,55 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   Widget _buildQuizContent(QuizProvider provider) {
     final question = provider.currentQuestion;
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary.withAlpha(50),
-                  Theme.of(context).colorScheme.secondary.withAlpha(30),
-                ],
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ProgressBar(progress: provider.progress),
-                    const SizedBox(height: 32),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight - 200,
-                          ),
-                          child: FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: _buildQuestionContent(question),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    NavigationButtons(
-                      onPrevious: provider.currentQuestionIndex > 0
-                          ? () => provider.previousQuestion()
-                          : null,
-                      onNext: () => provider.nextQuestion(),
-                      showNext: _canMoveNext(provider),
-                    ),
-                  ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).primaryColor.withAlpha(204),
+              Theme.of(context).primaryColor,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ProgressBar(progress: provider.progress),
+                const SizedBox(height: 32),
+                Text(
+                  question.text,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: 32),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: _buildQuestionContent(question),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                NavigationButtons(
+                  onPrevious: provider.currentQuestionIndex > 0
+                      ? () => provider.previousQuestion()
+                      : null,
+                  onNext: () => provider.nextQuestion(),
+                  showNext: _canMoveNext(provider),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -108,8 +108,9 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
-      onPopInvoked: (_) {
+      onPopInvokedWithResult: (bool didPop) async {
         Provider.of<QuizProvider>(context, listen: false).resetQuiz();
+        return true;
       },
       child: Consumer<QuizProvider>(
         builder: (context, provider, _) {

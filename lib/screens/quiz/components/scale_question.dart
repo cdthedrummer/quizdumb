@@ -85,11 +85,11 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                 position: _sliderPosition,
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: Colors.white.withOpacity(0.9),
-                    inactiveTrackColor: Colors.white.withOpacity(0.2),
+                    activeTrackColor: Colors.white.withAlpha(230),  // 0.9 * 255
+                    inactiveTrackColor: Colors.white.withAlpha(51),  // 0.2 * 255
                     thumbColor: Colors.white,
-                    overlayColor: Colors.white.withOpacity(0.12),
-                    valueIndicatorColor: Colors.white.withOpacity(0.9),
+                    overlayColor: Colors.white.withAlpha(31),  // 0.12 * 255
+                    valueIndicatorColor: Colors.white.withAlpha(230),  // 0.9 * 255
                     valueIndicatorTextStyle: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -102,8 +102,8 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                       elevation: 4.0,
                     ),
                     tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
-                    activeTickMarkColor: Colors.white.withOpacity(0.9),
-                    inactiveTickMarkColor: Colors.white.withOpacity(0.4),
+                    activeTickMarkColor: Colors.white.withAlpha(230),  // 0.9 * 255
+                    inactiveTickMarkColor: Colors.white.withAlpha(102),  // 0.4 * 255
                   ),
                   child: Slider(
                     min: 1,
@@ -136,14 +136,14 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
               widget.labels[1] ?? '',
               style: textStyle.copyWith(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withAlpha(179),  // 0.7 * 255
               ),
             ),
             Text(
               widget.labels[7] ?? '',
               style: textStyle.copyWith(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withAlpha(179),  // 0.7 * 255
               ),
             ),
           ],

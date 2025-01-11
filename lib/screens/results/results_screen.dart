@@ -16,88 +16,95 @@ class ResultsScreen extends StatelessWidget {
         final scores = quizProvider.scores;
         final characterClass = _determineCharacterClass(scores);
 
-        return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).primaryColor.withAlpha(204),
-                  Theme.of(context).primaryColor,
-                ],
+        return WillPopScope(
+          onWillPop: () async {
+            quizProvider.resetQuiz();
+            return true;
+          },
+          child: Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).primaryColor.withAlpha(204),
+                    Theme.of(context).primaryColor,
+                  ],
+                ),
               ),
-            ),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'Your Adventure Class',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: 'Quicksand',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildCharacterSection(characterClass),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        height: 300,
-                        child: StatRadarChart(scores: scores),
-                      ),
-                      const SizedBox(height: 32),
-                      _buildAttributeSection(
-                        'Your Strengths',
-                        _getTopAttributes(scores),
-                        Icons.star,
-                        Colors.amber,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildAttributeSection(
-                        'Areas to Level Up',
-                        _getImprovementAreas(scores),
-                        Icons.trending_up,
-                        Colors.greenAccent,
-                      ),
-                      const SizedBox(height: 32),
-                      ElevatedButton(
-                        onPressed: () {
-                          quizProvider.resetQuiz();
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (context) => const WelcomeScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: const Text(
-                          'Start New Quest',
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Your Adventure Class',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 32,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                             fontFamily: 'Quicksand',
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 24),
+                        _buildCharacterSection(characterClass),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          height: 300,
+                          child: StatRadarChart(scores: scores),
+                        ),
+                        const SizedBox(height: 32),
+                        _buildAttributeSection(
+                          'Your Strengths',
+                          _getTopAttributes(scores),
+                          Icons.star,
+                          Colors.amber,
+                        ),
+                        const SizedBox(height: 24),
+                        _buildAttributeSection(
+                          'Areas to Level Up',
+                          _getImprovementAreas(scores),
+                          Icons.trending_up,
+                          Colors.greenAccent,
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: () {
+                            quizProvider.resetQuiz();
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (context) => const WelcomeScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).primaryColor,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: const Text(
+                            'Start New Quest',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Quicksand',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -109,22 +116,28 @@ class ResultsScreen extends StatelessWidget {
   }
 
   CharacterClass _determineCharacterClass(Map<String, double> scores) {
-    var bestMatch = characterClasses[0];
-    var highestMatch = 0.0;
+    if (scores.isEmpty) return characterClasses.first;
+
+    var bestMatch = characterClasses.first;
+    var highestScore = 0.0;
 
     for (final characterClass in characterClasses) {
-      var matchScore = 0.0;
+      var currentScore = 0.0;
       var totalWeight = 0.0;
 
-      characterClass.attributeWeights.forEach((attr, weight) {
-        matchScore += (scores[attr] ?? 0.0) * weight;
-        totalWeight += weight;
+      characterClass.attributeWeights.forEach((attribute, weight) {
+        if (scores.containsKey(attribute)) {
+          currentScore += scores[attribute]! * weight;
+          totalWeight += weight;
+        }
       });
 
-      final normalizedMatch = matchScore / totalWeight;
-      if (normalizedMatch > highestMatch) {
-        highestMatch = normalizedMatch;
-        bestMatch = characterClass;
+      if (totalWeight > 0) {
+        final normalizedScore = currentScore / totalWeight;
+        if (normalizedScore > highestScore) {
+          highestScore = normalizedScore;
+          bestMatch = characterClass;
+        }
       }
     }
 
@@ -132,15 +145,21 @@ class ResultsScreen extends StatelessWidget {
   }
 
   List<String> _getTopAttributes(Map<String, double> scores) {
-    final sortedAttrs = scores.entries.toList()
+    if (scores.isEmpty) return [];
+    
+    final sortedEntries = scores.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    return sortedAttrs.take(3).map((e) => e.key).toList();
+    
+    return sortedEntries.take(3).map((e) => e.key).toList();
   }
 
   List<String> _getImprovementAreas(Map<String, double> scores) {
-    final sortedAttrs = scores.entries.toList()
+    if (scores.isEmpty) return [];
+    
+    final sortedEntries = scores.entries.toList()
       ..sort((a, b) => a.value.compareTo(b.value));
-    return sortedAttrs.take(2).map((e) => e.key).toList();
+    
+    return sortedEntries.take(2).map((e) => e.key).toList();
   }
 
   Widget _buildCharacterSection(CharacterClass characterClass) {

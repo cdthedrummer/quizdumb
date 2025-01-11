@@ -64,7 +64,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Theme.of(context).primaryColor.withAlpha(204),  // 0.8 opacity
+                  Theme.of(context).primaryColor.withAlpha(204),  // Updated: 0.8 opacity * 255 = 204
                   Theme.of(context).primaryColor,
                 ],
               ),

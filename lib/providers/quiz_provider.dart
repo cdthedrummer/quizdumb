@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
-import 'package:shared_preferences.dart';
 import '../models/question.dart';
 import '../data/questions.dart';
 
@@ -17,7 +16,7 @@ class QuizProvider with ChangeNotifier {
   QuizStatus _status = QuizStatus.notStarted;
   final List<Question> _questions = questions;
   bool _isLoading = false;
-  String? _currentCheckpointMessage;
+  String? _checkpointMessage;
 
   QuizStatus get status => _status;
   int get currentQuestionIndex => _currentIndex;
@@ -25,24 +24,13 @@ class QuizProvider with ChangeNotifier {
   double get progress => _currentIndex / (_questions.length - 1);
   Map<String, double> get scores => calculateScores();
   bool get isLoading => _isLoading;
-  String? get currentCheckpointMessage => _currentCheckpointMessage;
+  String? get checkpointMessage => _checkpointMessage;
 
-  // Get encouraging message based on progress
-  String getEncouragingMessage() {
-    final currentProgress = progress * 100;
-    if (currentProgress < 33) {
-      return 'Great start! Keep going, you\'re doing great! 🌟';
-    } else if (currentProgress < 66) {
-      return 'Halfway there! Your journey is shaping up nicely! ⚔️';
-    } else {
-      return 'Almost there! You\'re on the path to greatness! 🏆';
-    }
-  }
-
-  // Check if current question is a checkpoint
-  bool get isAtCheckpoint {
-    if (_currentIndex >= _questions.length) return false;
-    return currentQuestion.isCheckpoint;
+  String getProgressMessage() {
+    final percent = progress * 100;
+    if (percent < 33) return 'You\'re off to a great start! 🌟';
+    if (percent < 66) return 'Halfway there! Keep going! ⚔️';
+    return 'Almost there! The finish line is in sight! 🏆';
   }
 
   void startQuiz() {
@@ -50,9 +38,8 @@ class QuizProvider with ChangeNotifier {
     _currentIndex = 0;
     _answers.clear();
     _isLoading = false;
-    _currentCheckpointMessage = null;
+    _checkpointMessage = null;
     notifyListeners();
-    saveProgress();
   }
 
   void resetQuiz() {
@@ -60,9 +47,8 @@ class QuizProvider with ChangeNotifier {
     _currentIndex = 0;
     _answers.clear();
     _isLoading = false;
-    _currentCheckpointMessage = null;
+    _checkpointMessage = null;
     notifyListeners();
-    saveProgress();
   }
 
   Future<void> nextQuestion() async {
@@ -74,16 +60,18 @@ class QuizProvider with ChangeNotifier {
 
       await Future.delayed(const Duration(milliseconds: 100));
       
-      // Check if next question is a checkpoint
-      if (_questions[_currentIndex + 1].isCheckpoint) {
+      // Check for checkpoint
+      final nextQuestion = _questions[_currentIndex + 1];
+      if (nextQuestion.isCheckpoint) {
         _status = QuizStatus.checkpoint;
-        _currentCheckpointMessage = _questions[_currentIndex + 1].encouragingMessage;
+        _checkpointMessage = nextQuestion.encouragingMessage;
+      } else {
+        _status = QuizStatus.inProgress;
       }
       
       _currentIndex++;
       _isLoading = false;
       notifyListeners();
-      saveProgress();
     } else {
       _isLoading = true;
       notifyListeners();
@@ -92,7 +80,6 @@ class QuizProvider with ChangeNotifier {
       _status = QuizStatus.complete;
       _isLoading = false;
       notifyListeners();
-      saveProgress();
     }
   }
 
@@ -104,16 +91,10 @@ class QuizProvider with ChangeNotifier {
 
     await Future.delayed(const Duration(milliseconds: 100));
     _currentIndex--;
-    
-    // Update status if moving back from a checkpoint
-    if (_status == QuizStatus.checkpoint && !currentQuestion.isCheckpoint) {
-      _status = QuizStatus.inProgress;
-      _currentCheckpointMessage = null;
-    }
-    
+    _status = QuizStatus.inProgress;
+    _checkpointMessage = null;
     _isLoading = false;
     notifyListeners();
-    saveProgress();
   }
 
   List<String>? getAnswerForQuestion(String questionId) {
@@ -123,46 +104,6 @@ class QuizProvider with ChangeNotifier {
   void answerQuestion(String questionId, List<String> answer) {
     _answers[questionId] = answer;
     notifyListeners();
-    saveProgress();
-  }
-
-  // Save progress to local storage
-  Future<void> saveProgress() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final progress = {
-        'currentIndex': _currentIndex,
-        'status': _status.index,
-        'answers': _answers,
-      };
-      await prefs.setString('quiz_progress', jsonEncode(progress));
-    } catch (e) {
-      debugPrint('Error saving progress: $e');
-    }
-  }
-
-  // Load progress from local storage
-  Future<void> loadProgress() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedProgress = prefs.getString('quiz_progress');
-      
-      if (savedProgress != null) {
-        final progress = jsonDecode(savedProgress);
-        _currentIndex = progress['currentIndex'] ?? 0;
-        _status = QuizStatus.values[progress['status'] ?? 0];
-        _answers.clear();
-        _answers.addAll(Map<String, List<String>>.from(progress['answers'] ?? {}));
-        
-        if (_currentIndex < _questions.length && _questions[_currentIndex].isCheckpoint) {
-          _currentCheckpointMessage = _questions[_currentIndex].encouragingMessage;
-        }
-        
-        notifyListeners();
-      }
-    } catch (e) {
-      debugPrint('Error loading progress: $e');
-    }
   }
 
   Map<String, double> calculateScores() {
@@ -193,7 +134,6 @@ class QuizProvider with ChangeNotifier {
         }
       }
 
-      // Normalize scores
       final normalizedScores = <String, double>{};
       scores.forEach((key, value) {
         final total = totals[key] ?? 1;

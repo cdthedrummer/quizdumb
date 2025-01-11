@@ -22,7 +22,6 @@ class ScaleQuestion extends StatefulWidget {
 class _ScaleQuestionState extends State<ScaleQuestion> {
   bool _isDragging = false;
   Offset _sliderPosition = Offset.zero;
-  final GlobalKey _sliderKey = GlobalKey();
 
   String _getLabelForValue(int value) {
     if (value <= 2) return widget.labels[1] ?? '';
@@ -30,24 +29,11 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     return widget.labels[4] ?? '';
   }
 
-  void _calculateSliderPosition() {
-    final RenderBox? renderBox = _sliderKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-
-    final sliderWidth = renderBox.size.width;
+  void _calculateSliderPosition(BuildContext context, double width) {
     final normalizedValue = (widget.value - 1) / 6;
-    final xPos = 16 + (sliderWidth - 32) * normalizedValue;
-
+    final xPos = 16 + (width - 32) * normalizedValue;
     setState(() {
-      _sliderPosition = Offset(xPos, renderBox.size.height / 2);
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _calculateSliderPosition();
+      _sliderPosition = Offset(xPos, 24);  // Fixed height for slider
     });
   }
 
@@ -59,25 +45,28 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
       fontSize: 16,
     );
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            _getLabelForValue(widget.value),
-            key: ValueKey<int>(widget.value),
-            style: textStyle.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate position whenever layout changes
+        _calculateSliderPosition(context, constraints.maxWidth);
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Current value label
+            Container(
+              height: 28,  // Fixed height for consistent layout
+              child: Text(
+                _getLabelForValue(widget.value),
+                style: textStyle.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 32),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            return Container(
-              key: _sliderKey,
+            const SizedBox(height: 32),
+            // Slider section
+            Container(
               width: constraints.maxWidth,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SliderTrail(
@@ -85,11 +74,11 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                 position: _sliderPosition,
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: Colors.white.withAlpha(230),  // 0.9 * 255
-                    inactiveTrackColor: Colors.white.withAlpha(51),  // 0.2 * 255
+                    activeTrackColor: Colors.white.withAlpha(230),
+                    inactiveTrackColor: Colors.white.withAlpha(51),
                     thumbColor: Colors.white,
-                    overlayColor: Colors.white.withAlpha(31),  // 0.12 * 255
-                    valueIndicatorColor: Colors.white.withAlpha(230),  // 0.9 * 255
+                    overlayColor: Colors.white.withAlpha(31),
+                    valueIndicatorColor: Colors.white.withAlpha(230),
                     valueIndicatorTextStyle: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -102,8 +91,8 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                       elevation: 4.0,
                     ),
                     tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
-                    activeTickMarkColor: Colors.white.withAlpha(230),  // 0.9 * 255
-                    inactiveTickMarkColor: Colors.white.withAlpha(102),  // 0.4 * 255
+                    activeTickMarkColor: Colors.white.withAlpha(230),
+                    inactiveTickMarkColor: Colors.white.withAlpha(102),
                   ),
                   child: Slider(
                     min: 1,
@@ -116,7 +105,7 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                     },
                     onChanged: (newValue) {
                       widget.onChanged(newValue.round());
-                      _calculateSliderPosition();
+                      _calculateSliderPosition(context, constraints.maxWidth);
                     },
                     onChangeEnd: (value) {
                       setState(() => _isDragging = false);
@@ -125,30 +114,34 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                   ),
                 ),
               ),
-            );
-          },
-        ),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              widget.labels[1] ?? '',
-              style: textStyle.copyWith(
-                fontSize: 14,
-                color: Colors.white.withAlpha(179),  // 0.7 * 255
-              ),
             ),
-            Text(
-              widget.labels[7] ?? '',
-              style: textStyle.copyWith(
-                fontSize: 14,
-                color: Colors.white.withAlpha(179),  // 0.7 * 255
+            const SizedBox(height: 24),
+            // Min/Max labels
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.labels[1] ?? '',
+                    style: textStyle.copyWith(
+                      fontSize: 14,
+                      color: Colors.white.withAlpha(179),
+                    ),
+                  ),
+                  Text(
+                    widget.labels[7] ?? '',
+                    style: textStyle.copyWith(
+                      fontSize: 14,
+                      color: Colors.white.withAlpha(179),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

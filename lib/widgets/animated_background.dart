@@ -126,7 +126,7 @@ class BackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.04) // More transparent
+      ..color = Colors.white.withAlpha(10) // Replaced withOpacity with withAlpha
       ..style = PaintingStyle.fill;
 
     for (var shape in shapes) {

@@ -1,62 +1,60 @@
-# QuizDumb
-
-A D&D-inspired character trait quiz app built with Flutter.
-
-## About
-
-QuizDumb helps users understand their strengths and areas for growth through a fun, gamified quiz experience. Taking inspiration from Dungeons & Dragons character classes, it provides personalized insights based on six core attributes:
-
-- Strength
-- Dexterity
-- Constitution
-- Intelligence
-- Wisdom
-- Charisma
-
-## Features
-
-- 🎲 Interactive quiz with various question types
-- 📊 Beautiful stat visualization
-- 🎮 D&D-inspired character classes
-- ✨ Smooth animations and transitions
-- 🎨 Modern, gradient-based design
-- 📱 Responsive layout
-
-## Project Structure
+# QuizDumb App Structure
 
 ```
 lib/
-  ├── data/             # Data models and static content
-  ├── models/           # Core data structures
-  ├── providers/        # State management
-  ├── screens/          # UI screens
-  │   ├── quiz/        
-  │   ├── results/     
-  │   └── welcome/     
-  ├── widgets/          # Reusable components
-  └── theme/           # Global styling
+├── config/                     # App configuration
+│   ├── constants.dart         # App-wide constants
+│   └── routes.dart           # Route definitions
+│
+├── core/                      # Core functionality
+│   ├── exceptions/           # Custom exceptions
+│   ├── utils/               # Utility functions
+│   └── extensions/          # Dart extensions
+│
+├── data/                     # Data layer
+│   ├── models/              # Data models
+│   │   ├── question.dart
+│   │   ├── result.dart
+│   │   └── character_class.dart
+│   └── repositories/        # Data repositories
+│       └── quiz_repository.dart
+│
+├── providers/               # State management
+│   └── quiz_provider.dart
+│
+├── screens/                 # UI screens
+│   ├── welcome/            # Welcome screen
+│   │   ├── components/    # Screen-specific components
+│   │   └── welcome_screen.dart
+│   ├── quiz/              # Quiz screen
+│   │   ├── components/    # Quiz-specific components
+│   │   └── quiz_screen.dart
+│   └── results/           # Results screen
+│       ├── components/    # Results-specific components
+│       └── results_screen.dart
+│
+├── shared/                 # Shared components
+│   ├── widgets/           # Reusable widgets
+│   │   ├── animated_background.dart
+│   │   └── success_burst.dart
+│   └── animations/        # Shared animations
+│
+├── theme/                 # App theming
+│   ├── app_colors.dart
+│   ├── app_text_styles.dart
+│   └── app_theme.dart
+│
+└── main.dart             # App entry point
 ```
 
-## Getting Started
+## Core Features
+- Use nullable types only when necessary
+- Keep business logic in provider/repository layer
+- Maintain single responsibility principle
+- Consistent file and class naming
 
-1. Make sure you have Flutter installed
-2. Clone this repository
-3. Run `flutter pub get` to install dependencies
-4. Run `flutter run` to start the app
-
-## Development Status
-
-Currently at version 1.0.0 with a stable implementation of:
-- Welcome screen
-- Quiz interface
-- Results screen with character analysis
-
-Next up:
-- Enhanced quiz UI with gradient backgrounds
-- Auto-progression for single-answer questions
-- Improved scale selector UX
-- More visual feedback and animations
-
-## Contributing
-
-Feel free to submit issues and enhancement requests!
+## Best Practices
+- Keep widgets focused and small
+- Use const constructors where possible
+- Extract magic numbers to constants
+- Handle errors gracefully

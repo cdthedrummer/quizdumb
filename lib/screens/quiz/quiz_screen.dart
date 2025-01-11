@@ -103,3 +103,75 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (_) {
+        Provider.of<QuizProvider>(context, listen: false).resetQuiz();
+      },
+      child: Consumer<QuizProvider>(
+        builder: (context, provider, _) {
+          if (provider.status == QuizStatus.complete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _navigateToResults();
+            });
+            return const SizedBox.shrink();
+          }
+
+          if (provider.status == QuizStatus.checkpoint) {
+            return CheckpointScreen(
+              message: provider.checkpointMessage ?? provider.getProgressMessage(),
+              progress: provider.progress,
+              onContinue: () => provider.nextQuestion(),
+            );
+          }
+
+          return _buildQuizContent(provider);
+        },
+      ),
+    );
+  }
+
+  Widget _buildQuestionContent(Question question) {
+    final provider = Provider.of<QuizProvider>(context, listen: false);
+    final currentAnswer = provider.getAnswerForQuestion(question.id);
+    
+    if (question.isScale) {
+      final scaleValue = currentAnswer?.isNotEmpty == true 
+          ? int.tryParse(currentAnswer!.first) ?? 4 
+          : 4;
+          
+      return ScaleQuestion(
+        labels: question.scaleLabels!,
+        value: scaleValue,
+        onChanged: (value) {
+          provider.answerQuestion(question.id, [value.toString()]);
+        },
+      );
+    }
+
+    return MultipleChoiceQuestion(
+      options: question.options!,
+      isMultiSelect: question.isMultipleChoice,
+      selectedAnswers: currentAnswer ?? [],
+      onAnswerSelected: (answers, _) {
+        provider.answerQuestion(question.id, answers);
+        
+        if (!question.isMultipleChoice) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              provider.nextQuestion();
+            }
+          });
+        }
+      },
+    );
+  }
+
+  bool _canMoveNext(QuizProvider provider) {
+    final currentQuestionId = provider.currentQuestion.id;
+    return provider.getAnswerForQuestion(currentQuestionId) != null;
+  }
+}

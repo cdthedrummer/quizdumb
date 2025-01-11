@@ -19,7 +19,6 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fadeAnimation;
-  bool _isInteracting = false;
 
   @override
   void initState() {
@@ -41,63 +40,84 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  Future<void> _navigateToResults(BuildContext context) async {
+    await Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 500),
+        pageBuilder: (context, animation, secondaryAnimation) => const ResultsScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuizProvider>(
-      builder: (context, quizProvider, _) {
-        final question = quizProvider.currentQuestion;
-        
-        if (quizProvider.status == QuizStatus.complete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const ResultsScreen(),
-              ),
-            );
-          });
-        }
+    return WillPopScope(
+      onWillPop: () async {
+        Provider.of<QuizProvider>(context, listen: false).resetQuiz();
+        return true;
+      },
+      child: Consumer<QuizProvider>(
+        builder: (context, quizProvider, _) {
+          final question = quizProvider.currentQuestion;
+          
+          if (quizProvider.status == QuizStatus.complete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _navigateToResults(context);
+            });
+          }
 
-        return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).primaryColor.withAlpha(204),  // Updated: 0.8 opacity * 255 = 204
-                  Theme.of(context).primaryColor,
-                ],
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ProgressBar(progress: quizProvider.progress),
-                    const SizedBox(height: 32),
-                    Expanded(
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: _buildQuestionContent(question),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    NavigationButtons(
-                      onPrevious: quizProvider.currentQuestionIndex > 0
-                          ? () => quizProvider.previousQuestion()
-                          : null,
-                      onNext: () => quizProvider.nextQuestion(),
-                      showNext: _canMoveNext(quizProvider),
-                    ),
+          return Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).primaryColor.withAlpha(204),
+                    Theme.of(context).primaryColor,
                   ],
                 ),
               ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ProgressBar(progress: quizProvider.progress),
+                      const SizedBox(height: 32),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const ClampingScrollPhysics(),
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildQuestionContent(question),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      NavigationButtons(
+                        onPrevious: quizProvider.currentQuestionIndex > 0
+                            ? () => quizProvider.previousQuestion()
+                            : null,
+                        onNext: () => quizProvider.nextQuestion(),
+                        showNext: _canMoveNext(quizProvider),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -114,11 +134,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         labels: question.scaleLabels!,
         value: scaleValue,
         onChanged: (value) {
-          setState(() => _isInteracting = true);
           provider.answerQuestion(question.id, [value.toString()]);
-        },
-        onInteractionEnd: () {
-          setState(() => _isInteracting = false);
         },
       );
     }

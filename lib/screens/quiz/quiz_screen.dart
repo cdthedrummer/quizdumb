@@ -40,11 +40,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Future<bool> _onWillPop() async {
-    Provider.of<QuizProvider>(context, listen: false).resetQuiz();
-    return true;
-  }
-
   void _navigateToResults() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -57,7 +52,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
-      onPopInvokedWithResult: _onWillPop,
+      onPopInvokedWithResult: (bool didPop) async {
+        Provider.of<QuizProvider>(context, listen: false).resetQuiz();
+        return true;
+      },
       child: Consumer<QuizProvider>(
         builder: (context, quizProvider, _) {
           final question = quizProvider.currentQuestion;
@@ -147,7 +145,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       options: question.options!,
       isMultiSelect: question.isMultipleChoice,
       selectedAnswers: currentAnswer ?? [],
-      onAnswerSelected: (answers, _) {  // Fixed the callback signature
+      onAnswerSelected: (answers, _) {
         provider.answerQuestion(question.id, answers);
         
         if (!question.isMultipleChoice) {

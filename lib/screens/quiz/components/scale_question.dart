@@ -21,7 +21,7 @@ class ScaleQuestion extends StatefulWidget {
 
 class _ScaleQuestionState extends State<ScaleQuestion> {
   bool _isDragging = false;
-  Offset _sliderPosition = Offset.zero;
+  Offset? _sliderPosition;
 
   String _getLabelForValue(int value) {
     if (value <= 2) return widget.labels[1] ?? '';
@@ -29,12 +29,10 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
     return widget.labels[4] ?? '';
   }
 
-  void _calculateSliderPosition(BuildContext context, double width) {
+  Offset _getSliderPosition(double width) {
     final normalizedValue = (widget.value - 1) / 6;
     final xPos = 16 + (width - 32) * normalizedValue;
-    setState(() {
-      _sliderPosition = Offset(xPos, 24);  // Fixed height for slider
-    });
+    return Offset(xPos, 24);
   }
 
   @override
@@ -47,15 +45,15 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate position whenever layout changes
-        _calculateSliderPosition(context, constraints.maxWidth);
+        final position = _sliderPosition ?? _getSliderPosition(constraints.maxWidth);
+        _sliderPosition = position;
 
         return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Current value label
             Container(
-              height: 28,  // Fixed height for consistent layout
+              height: 28,
+              alignment: Alignment.center,
               child: Text(
                 _getLabelForValue(widget.value),
                 style: textStyle.copyWith(
@@ -65,13 +63,12 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
               ),
             ),
             const SizedBox(height: 32),
-            // Slider section
             Container(
               width: constraints.maxWidth,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SliderTrail(
                 isDragging: _isDragging,
-                position: _sliderPosition,
+                position: position,
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: Colors.white.withAlpha(230),
@@ -105,7 +102,9 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
                     },
                     onChanged: (newValue) {
                       widget.onChanged(newValue.round());
-                      _calculateSliderPosition(context, constraints.maxWidth);
+                      setState(() {
+                        _sliderPosition = _getSliderPosition(constraints.maxWidth);
+                      });
                     },
                     onChangeEnd: (value) {
                       setState(() => _isDragging = false);
@@ -116,8 +115,7 @@ class _ScaleQuestionState extends State<ScaleQuestion> {
               ),
             ),
             const SizedBox(height: 24),
-            // Min/Max labels
-            Container(
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

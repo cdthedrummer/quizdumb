@@ -40,18 +40,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Future<void> _navigateToResults(BuildContext context) async {
-    await Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (context, animation, secondaryAnimation) => const ResultsScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
+  void _navigateToResults(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const ResultsScreen(),
       ),
     );
   }
@@ -74,46 +66,55 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           }
 
           return Scaffold(
-            body: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).primaryColor.withAlpha(204),
-                    Theme.of(context).primaryColor,
-                  ],
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ProgressBar(progress: quizProvider.progress),
-                      const SizedBox(height: 32),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          physics: const ClampingScrollPhysics(),
-                          child: FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: _buildQuestionContent(question),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      NavigationButtons(
-                        onPrevious: quizProvider.currentQuestionIndex > 0
-                            ? () => quizProvider.previousQuestion()
-                            : null,
-                        onNext: () => quizProvider.nextQuestion(),
-                        showNext: _canMoveNext(quizProvider),
-                      ),
-                    ],
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).primaryColor.withAlpha(204),
+                        Theme.of(context).primaryColor,
+                      ],
+                    ),
                   ),
-                ),
-              ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ProgressBar(progress: quizProvider.progress),
+                          const SizedBox(height: 32),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              physics: const ClampingScrollPhysics(),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: constraints.maxHeight - 200, // Account for progress bar and buttons
+                                ),
+                                child: FadeTransition(
+                                  opacity: _fadeAnimation,
+                                  child: _buildQuestionContent(question),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          NavigationButtons(
+                            onPrevious: quizProvider.currentQuestionIndex > 0
+                                ? () => quizProvider.previousQuestion()
+                                : null,
+                            onNext: () => quizProvider.nextQuestion(),
+                            showNext: _canMoveNext(quizProvider),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },

@@ -17,6 +17,7 @@ class MultipleChoiceQuestion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (isMultiSelect)
@@ -33,17 +34,10 @@ class MultipleChoiceQuestion extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: options.length,
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final isSelected = selectedAnswers.contains(option);
-              
-              return _buildOption(context, option, isSelected);
-            },
-          ),
-        ),
+        ...options.map((option) {
+          final isSelected = selectedAnswers.contains(option);
+          return _buildOption(context, option, isSelected);
+        }).toList(),
       ],
     );
   }

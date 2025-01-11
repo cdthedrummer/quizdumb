@@ -50,10 +50,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Provider.of<QuizProvider>(context, listen: false).resetQuiz();
-        return true;
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (bool didPop) {
+        if (didPop) {
+          Provider.of<QuizProvider>(context, listen: false).resetQuiz();
+        }
       },
       child: Consumer<QuizProvider>(
         builder: (context, quizProvider, _) {
@@ -92,7 +94,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                               physics: const ClampingScrollPhysics(),
                               child: ConstrainedBox(
                                 constraints: BoxConstraints(
-                                  minHeight: constraints.maxHeight - 200, // Account for progress bar and buttons
+                                  minHeight: constraints.maxHeight - 200,
                                 ),
                                 child: FadeTransition(
                                   opacity: _fadeAnimation,
@@ -144,7 +146,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       options: question.options!,
       isMultiSelect: question.isMultipleChoice,
       selectedAnswers: currentAnswer ?? [],
-      onAnswerSelected: (answers, position) {
+      onAnswerSelected: (answers) {
         provider.answerQuestion(question.id, answers);
         
         if (!question.isMultipleChoice) {

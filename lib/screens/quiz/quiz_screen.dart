@@ -108,9 +108,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return PopScope(
       canPop: true,
-      onPopInvokedWithResult: (didPop) {
-        Provider.of<QuizProvider>(context, listen: false).resetQuiz();
-        return Future.value(true);
+      onPopInvokedWithResult: (bool didPop) async {
+        if (!didPop) {
+          Provider.of<QuizProvider>(context, listen: false).resetQuiz();
+          return true;
+        }
+        return true;
       },
       child: Consumer<QuizProvider>(
         builder: (context, provider, _) {

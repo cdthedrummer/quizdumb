@@ -24,37 +24,55 @@ class WelcomeScreen extends StatelessWidget {
               const Text(
                 'UNLOCK YOUR POTENTIAL',
                 style: TextStyle(
-                  fontFamily: 'RobotoCondensed',
                   fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   color: Colors.white,
                   letterSpacing: 2,
                 ),
               ),
               const SizedBox(height: 24),
-              const _CategoryCard(
+              _CategoryCard(
                 title: 'STRENGTH',
                 description: 'Physical capabilities, endurance, and raw power',
                 tooltip: 'Train consistently to level up your physical stats',
-                color: Color(0xFFFF3B30),
+                color: const Color(0xFFFF3B30),
                 icon: Icons.fitness_center,
               ),
-              const _CategoryCard(
+              _CategoryCard(
                 title: 'INTELLIGENCE',
                 description: 'Mental acuity, problem-solving, and learning',
                 tooltip: 'Challenge your mind to boost these stats',
-                color: Color(0xFF30E3FF),
+                color: const Color(0xFF30E3FF),
                 icon: Icons.psychology,
               ),
-              const _CategoryCard(
+              _CategoryCard(
                 title: 'SOCIAL',
                 description: 'Communication, empathy, and relationships',
                 tooltip: 'Connect with others to enhance these traits',
-                color: Color(0xFFFFD700),
+                color: const Color(0xFFFFD700),
                 icon: Icons.people,
               ),
               const SizedBox(height: 32),
-              _StartButton(),
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to quiz
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF30E3FF),
+                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'BEGIN YOUR JOURNEY',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF141824),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -103,9 +121,8 @@ class _CategoryCard extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontFamily: 'RobotoCondensed',
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
                   ),
@@ -121,32 +138,6 @@ class _CategoryCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StartButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        // Navigate to quiz
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF30E3FF),
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: const Text(
-        'BEGIN YOUR JOURNEY',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF141824),
         ),
       ),
     );

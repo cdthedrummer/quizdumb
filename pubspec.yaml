@@ -9,8 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # State management
   provider: ^6.1.1
 
 dev_dependencies:
@@ -23,10 +21,3 @@ flutter:
   
   assets:
     - assets/images/
-  
-  fonts:
-    - family: RobotoCondensed
-      fonts:
-        - asset: assets/fonts/RobotoCondensed-Regular.ttf
-        - asset: assets/fonts/RobotoCondensed-Bold.ttf
-          weight: 700
